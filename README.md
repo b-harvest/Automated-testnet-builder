@@ -12,7 +12,7 @@ Run local_env.sh and make sure to check the **lastblock** number of the sink and
 git clone https://github.com/b-harvest/Automated-testnet-builder
 cd Automated-testnet-builder
 
-local_env.sh
+./local_env.sh
 #sync complete Ctrl + X, lastblock check
 
 git clone https://github.com/cosmosquad-labs/replay
