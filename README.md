@@ -70,15 +70,20 @@ crescentd tx gov vote $PROPOSALID yes \
 	--broadcast-mode block \
 	--output json -y
 ```
+**If the upgrade proposal passes, upgrade the binary when the upgrade block number is reached.** (In this example, V3 version)
 
 ## Rollback process
 Rollback process in case of bug after upgrade, Return to the very beginning of the forked network.
 ```
 crescentd tendermint unsafe-reset-all --home cre_validator
 crescentd tendermint unsafe-reset-all --home cre_sentry
+```
+**Returns the binary to a previous version of the upgrade.**(In this example, V2 version)
+```
 crescentd start --home cre_validator
 crescentd start --home cre_sentry
 ```
+Please proceed with the Upgrade Testing process again
 
 ## TODO
 Establish an IBC environment and integrated testing environment including backend and frontend, module testing cli, pingpub explorer
