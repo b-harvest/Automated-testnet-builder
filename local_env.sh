@@ -1,4 +1,9 @@
 #!/bin/bash
+wget https://blocksnapshot.s3.ap-northeast-2.amazonaws.com/crescent-1-genesis.json
+mv crescent-1-genesis.json cre_validator/config/genesis.json
+
+wget https://blocksnapshot.s3.ap-northeast-2.amazonaws.com/addrbook.json
+mv addrbook.json cre_validator/config/addrbook.json
 
 SNAP_RPC="http://54.95.40.202:26657"
 
