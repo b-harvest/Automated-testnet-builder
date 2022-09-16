@@ -71,5 +71,14 @@ crescentd tx gov vote $PROPOSALID yes \
 	--output json -y
 ```
 
+## Rollback process
+Rollback process in case of bug after upgrade, Return to the very beginning of the forked network.
+```
+crescentd tendermint unsafe-reset-all --home cre_validator
+crescentd tendermint unsafe-reset-all --home cre_sentry
+crescentd start --home cre_validator
+crescentd start --home cre_sentry
+```
+
 ## TODO
-Establish an IBC environment and integrated testing environment including backend and frontend
+Establish an IBC environment and integrated testing environment including backend and frontend, module testing cli, pingpub explorer
