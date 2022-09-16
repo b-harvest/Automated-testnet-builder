@@ -70,3 +70,6 @@ crescentd tx gov vote $PROPOSALID yes \
 	--broadcast-mode block \
 	--output json -y
 ```
+
+## TODO
+Establish an IBC environment and integrated testing environment including backend and frontend
