@@ -18,6 +18,7 @@ cd Automated-testnet-builder
 git clone https://github.com/cosmosquad-labs/replay
 cd replay
 go install
+cd ..
 replay cre_validator <lastblock>
 # > exported-genesis.json
 
