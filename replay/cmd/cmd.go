@@ -7,30 +7,63 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
-	"github.com/evmos/ethermint/encoding"
 	"github.com/spf13/cobra"
 
+	chain "github.com/Canto-Network/Canto/v2/app"
+	"github.com/Canto-Network/Canto/v2/cmd/config"
+	inflationtypes "github.com/Canto-Network/Canto/v2/x/inflation/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/evmos/ethermint/encoding"
+	ethermint "github.com/evmos/ethermint/types"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
+)
 
-	chain "github.com/Canto-Network/Canto/v2/app"
+var (
+	// AddressVerifier address verifier
+	AddressVerifier = func(bz []byte) error {
+		if n := len(bz); n != 20 && n != 32 {
+			return fmt.Errorf("incorrect address length %d", n)
+		}
+
+		return nil
+	}
+)
+
+const (
+	// DisplayDenom defines the denomination displayed to users in client applications.
+	DisplayDenom = "canto"
+	// BaseDenom defines to the default denomination used in canto (staking, EVM, governance, etc.)
+	BaseDenom = "acanto"
 )
 
 func NewReplayCmd() *cobra.Command {
 	var (
-		newChainId    = "canto-testnet-1"
+		newChainId    = "canto_9911-1"
 		initialHeight = int64(1)
 	)
 	cmd := &cobra.Command{
 		Use:  "replay [dir] [height]",
 		Args: cobra.ExactArgs(2),
 		PreRun: func(_ *cobra.Command, args []string) {
-			//chaincmd.GetConfig()
+			sdkConfig := sdk.GetConfig()
+			sdkConfig.SetPurpose(sdk.Purpose)
+			sdkConfig.SetCoinType(ethermint.Bip44CoinType)
+			sdkConfig.SetBech32PrefixForAccount(config.Bech32PrefixAccAddr, config.Bech32PrefixAccPub)
+			sdkConfig.SetBech32PrefixForValidator(config.Bech32PrefixValAddr, config.Bech32PrefixValPub)
+			sdkConfig.SetBech32PrefixForConsensusNode(config.Bech32PrefixConsAddr, config.Bech32PrefixConsPub)
+			sdkConfig.SetAddressVerifier(AddressVerifier)
+			sdkConfig.SetFullFundraiserPath(ethermint.BIP44HDPath)
+			if err := sdk.RegisterDenom(DisplayDenom, sdk.OneDec()); err != nil {
+				panic(err)
+			}
+
+			if err := sdk.RegisterDenom(BaseDenom, sdk.NewDecWithPrec(1, ethermint.BaseDenomUnit)); err != nil {
+				panic(err)
+			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := args[0]
@@ -45,8 +78,6 @@ func NewReplayCmd() *cobra.Command {
 				panic(err)
 			}
 			defer db.Close()
-
-			//encCfg := chain.MakeEncodingConfig()
 
 			// Load previous height
 			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
@@ -70,17 +101,17 @@ func NewReplayCmd() *cobra.Command {
 
 			// Create validator1
 			val1 := NewValidator(
-				"canto1zaavvzxez0elundtn32qnk9lkm8kmcszxclz6p",
+				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
 				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000)),
 				sdk.NewInt64Coin(bondDenom, 900_000_000_000_000_000),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
 				"val1",
 			)
 
-			if err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, val1.VotingPower); err != nil {
+			if err := app.InflationKeeper.MintCoins(ctx, val1.VotingPower[0]); err != nil {
 				return err
 			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, val1.GetAddress(), val1.VotingPower); err != nil {
+			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val1.GetAddress(), val1.VotingPower); err != nil {
 				return err
 			}
 			if err := val1.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
@@ -88,24 +119,24 @@ func NewReplayCmd() *cobra.Command {
 			}
 
 			val2 := NewValidator(
-				"canto1mzgucqnfr2l8cj5apvdpllhzt4zeuh2c5l33n3",
+				"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
 				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000)),
 				sdk.NewInt64Coin(bondDenom, 50_000_000_000_000_000),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
 				"val2",
 			)
-			if err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, val2.VotingPower); err != nil {
+			if err := app.InflationKeeper.MintCoins(ctx, val2.VotingPower[0]); err != nil {
 				return err
 			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, val2.GetAddress(), val2.VotingPower); err != nil {
+			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val2.GetAddress(), val2.VotingPower); err != nil {
 				return err
 			}
 			if err := val2.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
 				return err
 			}
 
-			staking.EndBlocker(ctx, *&app.StakingKeeper)
-			staking.BeginBlocker(ctx, *&app.StakingKeeper)
+			staking.EndBlocker(ctx, app.StakingKeeper)
+			staking.BeginBlocker(ctx, app.StakingKeeper)
 
 			log.Println("Exporting app state and validators...")
 
