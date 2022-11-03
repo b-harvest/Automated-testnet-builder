@@ -102,8 +102,8 @@ func NewReplayCmd() *cobra.Command {
 			// Create validator1
 			val1 := NewValidator(
 				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
-				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000)),
-				sdk.NewInt64Coin(bondDenom, 900_000_000_000_000_000),
+				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000_000_000_000)),
+				sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000_000_000_000),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
 				"val1",
 			)
@@ -120,8 +120,8 @@ func NewReplayCmd() *cobra.Command {
 
 			val2 := NewValidator(
 				"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
-				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000)),
-				sdk.NewInt64Coin(bondDenom, 50_000_000_000_000_000),
+				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000)),
+				sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
 				"val2",
 			)
