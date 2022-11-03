@@ -12,7 +12,7 @@ cd Automated-testnet-builder
 cd replay
 go install
 cd ..
-replay canto_val1/data 1477402
+replay canto_val1/data <block num>
 # > exported-genesis.json
 
 rm canto_val1/config/genesis.json

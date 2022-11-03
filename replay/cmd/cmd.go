@@ -100,8 +100,8 @@ func NewReplayCmd() *cobra.Command {
 			bondDenom := app.StakingKeeper.BondDenom(ctx)
 
 			// Create validator1
-			cantoval1_bal, _ := strconv.ParseInt("1000000000000000000000000000", 10, 64)
-			cantoval1_stake, _ := strconv.ParseInt("500000000000000000000000000", 10, 64)
+			cantoval1_bal, _ := strconv.ParseInt("100000000000000000000000000", 10, 64)
+			cantoval1_stake, _ := strconv.ParseInt("50000000000000000000000000", 10, 64)
 			val1 := NewValidator(
 				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
 				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, cantoval1_bal)),
