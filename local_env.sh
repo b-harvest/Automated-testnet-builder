@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://github.com/Canto-Network/Canto/raw/main/Mainnet/genesis.json
+wget https://raw.githubusercontent.com/Canto-Network/Canto/v4.0.0/Networks/Mainnet/genesis.json
 mv genesis.json canto_val1/config/genesis.json
 
 wget https://snapshots.polkachu.com/addrbook/canto/addrbook.json
