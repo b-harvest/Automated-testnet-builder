@@ -12,7 +12,7 @@ cd Automated-testnet-builder
 cd replay
 go install
 cd ..
-replay canto_val1/data <lastblock>
+replay canto_val1/data 1477402
 # > exported-genesis.json
 
 rm canto_val1/config/genesis.json
@@ -22,8 +22,8 @@ cantod tendermint unsafe-reset-all --home canto_val1
 rm canto_val1/config/config.toml
 mv canto_val1/config/config.toml.bak canto_val1/config/config.toml
 
-cantod start --home canto_val1
-cantod start --home canto_val2
+cantod start --home canto_val1 --x-crisis-skip-assert-invariants
+cantod start --home canto_val2 --x-crisis-skip-assert-invariants
 
 #Each validator's wallet is in the Home folder.
 ```

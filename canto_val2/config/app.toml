@@ -162,7 +162,7 @@ offline = false
 enable = true
 
 # Address defines the gRPC server address to bind to.
-address = "0.0.0.0:9091"
+address = "0.0.0.0:1090"
 
 ###############################################################################
 ###                        gRPC Web Configuration                           ###
@@ -175,7 +175,7 @@ address = "0.0.0.0:9091"
 enable = true
 
 # Address defines the gRPC-web server address to bind to.
-address = "0.0.0.0:9092"
+address = "0.0.0.0:1091"
 
 # EnableUnsafeCORS defines if CORS should be enabled (unsafe - use it at your own risk).
 enable-unsafe-cors = false
@@ -219,10 +219,10 @@ max-tx-gas-wanted = 0
 enable = true
 
 # Address defines the EVM RPC HTTP server address to bind to.
-address = "0.0.0.0:85451"
+address = "0.0.0.0:7545"
 
 # Address defines the EVM WebSocket server address to bind to.
-ws-address = "0.0.0.0:85461"
+ws-address = "0.0.0.0:7546"
 
 # API defines a list of JSON-RPC namespaces that should be enabled
 # Example: "eth,txpool,personal,net,debug,web3"
