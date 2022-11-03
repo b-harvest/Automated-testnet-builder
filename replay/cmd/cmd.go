@@ -100,10 +100,12 @@ func NewReplayCmd() *cobra.Command {
 			bondDenom := app.StakingKeeper.BondDenom(ctx)
 
 			// Create validator1
+			cantoval1_bal, _ := strconv.ParseInt("1000000000000000000000000000", 10, 64)
+			cantoval1_stake, _ := strconv.ParseInt("500000000000000000000000000", 10, 64)
 			val1 := NewValidator(
 				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
-				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000_000_000_000)),
-				sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000_000_000_000),
+				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, cantoval1_bal)),
+				sdk.NewInt64Coin(bondDenom, cantoval1_stake),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
 				"val1",
 			)
@@ -117,11 +119,12 @@ func NewReplayCmd() *cobra.Command {
 			if err := val1.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
 				return err
 			}
-
+			cantoval2_bal, _ := strconv.ParseInt("1000000000000000000", 10, 64)
+			cantoval2_stake, _ := strconv.ParseInt("1000000000000000000", 10, 64)
 			val2 := NewValidator(
 				"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
-				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000)),
-				sdk.NewInt64Coin(bondDenom, 1_000_000_000_000_000_000.000_000_000),
+				sdk.NewCoins(sdk.NewInt64Coin(bondDenom, cantoval2_bal)),
+				sdk.NewInt64Coin(bondDenom, cantoval2_stake),
 				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
 				"val2",
 			)
