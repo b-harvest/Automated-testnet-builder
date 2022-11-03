@@ -5,7 +5,7 @@ mv genesis.json canto_val1/config/genesis.json
 wget https://snapshots.polkachu.com/addrbook/canto/addrbook.json
 mv addrbook.json canto_val1/config/addrbook.json
 
-SNAP_RPC="https://endpoint1.bharvest.io/rpc/canto"
+SNAP_RPC="https://endpoint1.bharvest.io:443/rpc/canto"
 
 LATEST_HEIGHT=$(curl -s $SNAP_RPC/block | jq -r .result.block.header.height); \
 BLOCK_HEIGHT=$((LATEST_HEIGHT - 2000)); \
