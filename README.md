@@ -31,13 +31,13 @@ cantod start --home canto_val2
 ## Rollback process
 Rollback process in case of bug after upgrade, Return to the very beginning of the forked network.
 ```
-crescentd tendermint unsafe-reset-all --home canto_val1
-crescentd tendermint unsafe-reset-all --home canto_val2
+cantod tendermint unsafe-reset-all --home canto_val1
+cantod tendermint unsafe-reset-all --home canto_val2
 ```
 **Returns the binary to a previous version of the upgrade.**(In this example, V2 version)
 ```
-crescentd start --home canto_val1
-crescentd start --home canto_val2
+cantod start --home canto_val1
+cantod start --home canto_val2
 ```
 Please proceed with the Upgrade Testing process again
 
