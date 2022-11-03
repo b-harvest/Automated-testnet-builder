@@ -1,11 +1,5 @@
 # Automated-testnet-builder
-Based on the code below, the environment code builds a test environment with the mainnet forked version of the 1 validator system.
-
-Please check the corresponding REPO for more information
-
-https://github.com/cosmosquad-labs/replay/tree/crescent-v2-testnet
-
-If the version of the block-demon changes, the REPLAY dependency should also change.
+Based on the code below, the environment code builds a test environment with the mainnet forked version of the 2 validator system.
 ## Init ENV
 Run local_env.sh and make sure to check the **lastblock** number of the sink and run Replay
 ```
@@ -15,74 +9,35 @@ cd Automated-testnet-builder
 ./local_env.sh
 #sync complete Ctrl + X, lastblock check
 
-git clone https://github.com/cosmosquad-labs/replay
 cd replay
 go install
 cd ..
-replay cre_validator <lastblock>
+replay canto_val1/data <lastblock>
 # > exported-genesis.json
 
-rm cre_validator/config/genesis.json
-cp exported-genesis.json cre_validator/config/genesis.json
-mv exported-genesis.json cre_sentry/config/genesis.json
-crescentd tendermint unsafe-reset-all --home cre_validator
-rm cre_validator/config/config.toml
-mv cre_validator/config/config.toml.bak cre_validator/config/config.toml
+rm canto_val1/config/genesis.json
+cp exported-genesis.json canto_val1/config/genesis.json
+mv exported-genesis.json canto_val2/config/genesis.json
+cantod tendermint unsafe-reset-all --home canto_val1
+rm canto_val1/config/config.toml
+mv canto_val1/config/config.toml.bak canto_val1/config/config.toml
 
-crescentd start --home cre_validator
-crescentd start --home cre_sentry
+cantod start --home canto_val1
+cantod start --home canto_val2
+
+#Each validator's wallet is in the Home folder.
 ```
-
-## Upgrade Testing
-TBD items can always be changed, please check the status of the last block on the mainnet and fill it out
-```
-export BINARY=crescentd
-export CHAINID=crescent-1-local-test
-export TITLE=v3
-
-#crescentd status | jq | grep latest_block_height
-export UPGRADEHEIGHT=<TBD>
-
-export KEY=validator
-
-# submit upgrade proposal
-$BINARY tx gov submit-proposal software-upgrade $TITLE \
-	--title $TITLE \
-  --upgrade-height $UPGRADEHEIGHT \
-  --upgrade-info $TITLE \
-  --description $TITLE \
-	--deposit 500000000ucre \
-	--gas 400000 \
-	--from $KEY \
-  --keyring-backend test \
-	--chain-id $CHAINID \
-	--broadcast-mode block \
-	--output json -y
-
-
-# vote
-# crescentd q gov proposals | jq 
-export PROPOSALID=<TBD>
-
-crescentd tx gov vote $PROPOSALID yes \
-  --from $KEY \
-  --keyring-backend test \
-	--chain-id $CHAINID \
-	--broadcast-mode block \
-	--output json -y
-```
-**If the upgrade proposal passes, upgrade the binary when the upgrade block number is reached.** (In this example, V3 version)
 
 ## Rollback process
 Rollback process in case of bug after upgrade, Return to the very beginning of the forked network.
 ```
-crescentd tendermint unsafe-reset-all --home cre_validator
-crescentd tendermint unsafe-reset-all --home cre_sentry
+crescentd tendermint unsafe-reset-all --home canto_val1
+crescentd tendermint unsafe-reset-all --home canto_val2
 ```
 **Returns the binary to a previous version of the upgrade.**(In this example, V2 version)
 ```
-crescentd start --home cre_validator
-crescentd start --home cre_sentry
+crescentd start --home canto_val1
+crescentd start --home canto_val2
 ```
 Please proceed with the Upgrade Testing process again
 
