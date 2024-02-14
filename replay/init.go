@@ -55,8 +55,10 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 			exportFilePath = "vali-info.yaml"
 		}
 
+		homePath := homePrefix + "/" + moniker
+
 		var initBuffer bytes.Buffer
-		initCmd := exec.Command(binary, "--home", homePrefix, "init", "--chain-id", "canto_7700-1", moniker)
+		initCmd := exec.Command(binary, "--home", homePath, "init", "--chain-id", "canto_7700-1", moniker)
 		initCmd.Stdout = &initBuffer
 		initCmd.Stderr = &initBuffer
 		if err = initCmd.Run(); err != nil {
@@ -87,7 +89,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		if err != nil {
 			panic(err)
 		}
-		keysAddCmd := exec.Command(binary, "--home", homePrefix,
+		keysAddCmd := exec.Command(binary, "--home", homePath,
 			"keys", "add", moniker, "--recover", "--keyring-backend", "test", "--output", "json")
 		keysAddCmd.Stdin = &mnemonicBuffer
 		keysAddCmd.Stdout = &keysAddBuffer
@@ -110,7 +112,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		address := jqAddressBuffer.String()
 
 		var validatorKeyBuffer bytes.Buffer
-		validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", homePrefix)
+		validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", homePath)
 		validatorKeyCmd.Stdout = &validatorKeyBuffer
 		validatorKeyCmd.Stderr = &validatorKeyBuffer
 
