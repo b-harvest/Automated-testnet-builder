@@ -76,9 +76,10 @@ func ReadValidatorInfosFile(filename string, bondDenom string) (ValidatorList, e
 			return nil, err
 		}
 
-		var pubKey map[string]interface{}
-		pubKey["@type"] = privValidatorKey.PubKey.Type
-		pubKey["value"] = privValidatorKey.PubKey.Value
+		pubKey := map[string]interface{}{
+			"@type": privValidatorKey.PubKey.Type,
+			"value": privValidatorKey.PubKey.Value,
+		}
 
 		pubKeyStr, err := json.Marshal(pubKey)
 		if err != nil {
