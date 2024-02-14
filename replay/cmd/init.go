@@ -35,25 +35,25 @@ func ChainInitCmd() *cobra.Command {
 			for i := 0; i < count; i++ {
 				moniker := "validator-" + strconv.Itoa(i)
 
-				var initCmdBuffer bytes.Buffer
+				var initBuffer bytes.Buffer
 				initCmd := exec.Command(binary, "--home", moniker, "init", "--chain-id", "canto_7700-1", moniker)
-				initCmd.Stdout = &initCmdBuffer
-				initCmd.Stderr = &initCmdBuffer
+				initCmd.Stdout = &initBuffer
+				initCmd.Stderr = &initBuffer
 				if err = initCmd.Run(); err != nil {
-					panic(fmt.Errorf("%s\n", initCmdBuffer.String()))
+					panic(fmt.Errorf("%s\n", initBuffer.String()))
 				}
 
-				generateMnemonicCmdBuffer := new(bytes.Buffer)
+				generateMnemonicBuffer := new(bytes.Buffer)
 				// Generate mnemonic
 				generateMnemonicCmd := exec.Command(binary, "keys", "mnemonic")
-				generateMnemonicCmd.Stdout = generateMnemonicCmdBuffer
-				generateMnemonicCmd.Stderr = generateMnemonicCmdBuffer
+				generateMnemonicCmd.Stdout = generateMnemonicBuffer
+				generateMnemonicCmd.Stderr = generateMnemonicBuffer
 
 				if err = generateMnemonicCmd.Run(); err != nil {
-					panic(fmt.Errorf("%s\n", generateMnemonicCmdBuffer.String()))
+					panic(fmt.Errorf("%s\n", generateMnemonicBuffer.String()))
 				}
 
-				mnemonic := generateMnemonicCmdBuffer.String()
+				mnemonic := generateMnemonicBuffer.String()
 				mnemonicList = append(mnemonicList, mnemonic)
 
 				var mnemonicBuffer bytes.Buffer
@@ -62,24 +62,24 @@ func ChainInitCmd() *cobra.Command {
 					panic(err)
 				}
 
-				//keysAddCmdBuffer, keysAddCmdW, err := os.Pipe()
-				var keysAddCmdBuffer bytes.Buffer
+				//keysAddBuffer, keysAddCmdW, err := os.Pipe()
+				var keysAddBuffer bytes.Buffer
 				if err != nil {
 					panic(err)
 				}
 				keysAddCmd := exec.Command(binary, "--home", moniker,
 					"keys", "add", moniker, "--recover", "--keyring-backend", "test", "--output", "json")
 				keysAddCmd.Stdin = &mnemonicBuffer
-				keysAddCmd.Stdout = &keysAddCmdBuffer
-				keysAddCmd.Stderr = &keysAddCmdBuffer
+				keysAddCmd.Stdout = &keysAddBuffer
+				keysAddCmd.Stderr = &keysAddBuffer
 
 				if err = keysAddCmd.Run(); err != nil {
-					panic(fmt.Errorf("%s\n", keysAddCmdBuffer.String()))
+					panic(fmt.Errorf("%s\n", keysAddBuffer.String()))
 				}
 
 				var jqAddressBuffer bytes.Buffer
 				jqAddress := exec.Command("jq", "-r", ".address")
-				jqAddress.Stdin = &keysAddCmdBuffer
+				jqAddress.Stdin = &keysAddBuffer
 				jqAddress.Stdout = &jqAddressBuffer
 				jqAddress.Stderr = &jqAddressBuffer
 
@@ -88,6 +88,18 @@ func ChainInitCmd() *cobra.Command {
 				}
 
 				address := jqAddressBuffer.String()
+
+				var validatorKeyBuffer bytes.Buffer
+				validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", mnemonic)
+				validatorKeyCmd.Stdout = &validatorKeyBuffer
+				validatorKeyCmd.Stderr = &validatorKeyBuffer
+
+				if err = validatorKeyCmd.Run(); err != nil {
+					panic(fmt.Errorf("%s\n", validatorKeyBuffer.String()))
+				}
+
+				validatorKey := validatorKeyBuffer.String()
+
 				//// Read priv_validator_key.json
 				//privValidatorKeyBytes, err := os.ReadFile(fmt.Sprintf("%s/config/priv_validator_key.json", moniker))
 				//if err != nil {
@@ -104,17 +116,19 @@ func ChainInitCmd() *cobra.Command {
 				address, _ = strings.CutSuffix(address, "\n")
 				mnemonic, _ = strings.CutPrefix(mnemonic, "\n")
 				mnemonic, _ = strings.CutSuffix(mnemonic, "\n")
+				validatorKey, _ = strings.CutPrefix(validatorKey, "\n")
+				validatorKey, _ = strings.CutSuffix(validatorKey, "\n")
 
 				fmt.Printf("Moniker: %s \nmnemonic: %s \naddress: %s\n", moniker, mnemonic, address)
 
 				// Generate RawValidator
 				rawValidatorList = append(rawValidatorList, RawValidator{
-					Moniker:       moniker,
-					Address:       address,
-					BalAmount:     balAmount,
-					StakeAmount:   stakeAmount,
-					PublicKeyPath: fmt.Sprintf("%s/config/priv_validator_key.json", moniker),
-					Mnemonic:      mnemonic,
+					Moniker:      moniker,
+					Address:      address,
+					BalAmount:    balAmount,
+					StakeAmount:  stakeAmount,
+					ValidatorKey: validatorKey,
+					Mnemonic:     mnemonic,
 				})
 			}
 
