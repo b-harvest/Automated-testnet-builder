@@ -1,4 +1,4 @@
-module github.com/b-harvest/replay
+module github.com/b-harvest/automated-testnet-builder
 
 go 1.18
 
