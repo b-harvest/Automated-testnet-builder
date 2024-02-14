@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	ed255192 "crypto/ed25519"
 	"encoding/json"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -78,7 +76,11 @@ func ReadValidatorInfosFile(filename string, bondDenom string) (ValidatorList, e
 			return nil, err
 		}
 
-		pubKeyStr, err := json.Marshal(privValidatorKey.PubKey)
+		var pubKey map[string]interface{}
+		pubKey["@type"] = privValidatorKey.PubKey.Type
+		pubKey["value"] = privValidatorKey.PubKey.Value
+
+		pubKeyStr, err := json.Marshal(pubKey)
 		if err != nil {
 			return nil, err
 		}
@@ -124,15 +126,15 @@ func (v Validator) GetValAddress() sdk.ValAddress {
 
 func (v Validator) GetPubKey(codec codec.Codec) cryptotypes.PubKey {
 	var pk cryptotypes.PubKey
-	//if err := codec.UnmarshalInterfaceJSON([]byte(v.PublicKeyStr), &pk); err != nil {
-	//	panic(err)
-	//}
-	var keyStruct KeyStruct
-	err := json.Unmarshal([]byte(v.PublicKeyStr), &keyStruct)
-	if err != nil {
+	if err := codec.UnmarshalInterfaceJSON([]byte(v.PublicKeyStr), &pk); err != nil {
 		panic(err)
 	}
-	pk = &ed25519.PubKey{Key: ed255192.PublicKey(keyStruct.Value)}
+	//var keyStruct KeyStruct
+	//err := json.Unmarshal([]byte(v.PublicKeyStr), &keyStruct)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//pk = ed25519.PubKey{Key: ed255192.PublicKey(keyStruct.Value)}
 	return pk
 }
 
