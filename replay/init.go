@@ -24,7 +24,7 @@ func ChainInitCmd() *cobra.Command {
 			balAmount := args[1]
 			stakeAmount := args[2]
 
-			err = ChainInit(count, balAmount, stakeAmount, "")
+			err = ChainInit(count, balAmount, stakeAmount, "", "")
 			if err != nil {
 				return err
 			}
@@ -35,7 +35,7 @@ func ChainInitCmd() *cobra.Command {
 	return &cmd
 }
 
-func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath string) error {
+func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, monikerPrefix string) error {
 	var (
 		err              error
 		binary           = "cantod"
@@ -45,6 +45,9 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath str
 
 	for i := 0; i < count; i++ {
 		moniker := "validator-" + strconv.Itoa(i)
+		if monikerPrefix != "" {
+			moniker = monikerPrefix + strconv.Itoa(i)
+		}
 		if homePrefix == "" {
 			homePrefix = moniker
 		}
