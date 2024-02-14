@@ -1,14 +1,28 @@
 package cmd
 
 import (
+	"encoding/json"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ghodss/yaml"
 	tmstrings "github.com/tendermint/tendermint/libs/strings"
+	"os"
 )
+
+type RawValidator struct {
+	Moniker       string `yaml:"moniker"`
+	Address       string `yaml:"address"`
+	BalAmount     string `yaml:"balAmount"`
+	StakeAmount   string `yaml:"stakeAmount"`
+	PublicKeyPath string `yaml:"publicKeyPath"`
+	Mnemonic      string `yaml:"mnemonic"`
+}
+
+type RawValidatorList []RawValidator
 
 type Validator struct {
 	Address        string
@@ -16,6 +30,66 @@ type Validator struct {
 	SelfDelegation sdk.Coin
 	PublicKeyStr   string
 	Moniker        string
+}
+
+type PrivValidatorKey struct {
+	Address string    `json:"address"`
+	PubKey  KeyStruct `json:"pub_key"`
+	PrivKey KeyStruct `json:"priv_key"`
+}
+
+type KeyStruct struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type ValidatorList []Validator
+
+func ReadValidatorInfosFile(filename string, bondDenom string) (ValidatorList, error) {
+	fileContents, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	rawValidatorList := RawValidatorList{}
+	err = yaml.Unmarshal(fileContents, &rawValidatorList)
+	if err != nil {
+		return nil, err
+	}
+
+	var validatorList ValidatorList
+
+	for _, rv := range rawValidatorList {
+		balAmount, _ := sdk.NewIntFromString(rv.BalAmount)
+		stakeAmount, _ := sdk.NewIntFromString(rv.StakeAmount)
+
+		bytes, err := os.ReadFile(rv.PublicKeyPath)
+		if err != nil {
+			return nil, err
+		}
+
+		var privValidatorKey PrivValidatorKey
+		err = json.Unmarshal(bytes, &privValidatorKey)
+		if err != nil {
+			return nil, err
+		}
+
+		pubKeyStr, err := json.Marshal(privValidatorKey.PubKey)
+		if err != nil {
+			return nil, err
+		}
+
+		configuredVal := NewValidator(
+			rv.Address,
+			sdk.NewCoins(sdk.NewCoin(bondDenom, balAmount)),
+			sdk.NewCoin(bondDenom, stakeAmount),
+			string(pubKeyStr),
+			rv.Moniker,
+		)
+		validatorList = append(validatorList, configuredVal)
+	}
+
+	return validatorList, nil
 }
 
 func NewValidator(address string, votingPower sdk.Coins, selfDelegation sdk.Coin, pkStr string, moniker string) Validator {

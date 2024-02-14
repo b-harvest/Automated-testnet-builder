@@ -1,0 +1,13 @@
+- moniker: val1
+  address: canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2
+  balAmount: "1000000000000000000000000000"
+  stakeAmount: "500000000000000000000000000"
+  publicKeyStr: '{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}'
+
+- moniker: val2
+  address: canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan
+  balAmount: "10000000000000000000"
+  stakeAmount: "10000000000000000000"
+  publicKeyStr: '{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}'
+
+

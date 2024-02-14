@@ -45,7 +45,8 @@ func NewReplayCmd() *cobra.Command {
 		initialHeight = int64(1)
 	)
 	cmd := &cobra.Command{
-		Use:  "replay [dir]",
+		Use: "genesis",
+
 		Args: cobra.ExactArgs(2),
 		PreRun: func(_ *cobra.Command, args []string) {
 			sdkConfig := sdk.GetConfig()
@@ -65,7 +66,13 @@ func NewReplayCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				panic(fmt.Errorf("You have to use as \"replay [dir] [validator-file]\". "))
+			}
+
 			dir := args[0]
+			validatorFile := args[1]
+
 			cmd.SilenceUsage = true
 
 			db, err := sdk.NewLevelDB("application", dir)
@@ -97,46 +104,48 @@ func NewReplayCmd() *cobra.Command {
 			// Get staking bond denom
 			bondDenom := app.StakingKeeper.BondDenom(ctx)
 
-			bal_amoint1, _ := sdk.NewIntFromString("1000000000000000000000000000")
-			stake_amount1, _ := sdk.NewIntFromString("500000000000000000000000000")
-			val1_coin := sdk.NewCoin(bondDenom, bal_amoint1)
-			// Create validator1
-			val1 := NewValidator(
-				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
-				sdk.NewCoins(val1_coin),
-				sdk.NewCoin(bondDenom, stake_amount1),
-				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
-				"val1",
-			)
+			// Read Validators from file
+			validatorList, err := ReadValidatorInfosFile(validatorFile, bondDenom)
+			if err != nil {
+				panic(fmt.Errorf("Failed to read validator file: %s\n%s", validatorFile, err.Error()))
+			}
 
-			if err := app.InflationKeeper.MintCoins(ctx, val1.VotingPower[0]); err != nil {
-				return err
+			for _, v := range validatorList {
+
+				if err := app.InflationKeeper.MintCoins(ctx, v.VotingPower[0]); err != nil {
+					return err
+				}
+				if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, v.GetAddress(), v.VotingPower); err != nil {
+					return err
+				}
+
+				if err := v.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
+					return err
+				}
 			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val1.GetAddress(), val1.VotingPower); err != nil {
-				return err
-			}
-			if err := val1.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
-				return err
-			}
-			bal_amoint2, _ := sdk.NewIntFromString("10000000000000000000")
-			stake_amount2, _ := sdk.NewIntFromString("10000000000000000000")
-			val2_coin := sdk.NewCoin(bondDenom, bal_amoint2)
-			val2 := NewValidator(
-				"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
-				sdk.NewCoins(val2_coin),
-				sdk.NewCoin(bondDenom, stake_amount2),
-				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
-				"val2",
-			)
-			if err := app.InflationKeeper.MintCoins(ctx, val2.VotingPower[0]); err != nil {
-				return err
-			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val2.GetAddress(), val2.VotingPower); err != nil {
-				return err
-			}
-			if err := val2.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
-				return err
-			}
+
+			//bal_amoint, _ := sdk.NewIntFromString("1000000000000000000000000000")
+			//stake_amount, _ := sdk.NewIntFromString("500000000000000000000000000")
+			//val_coin := sdk.NewCoin(bondDenom, bal_amoint)
+			//
+			//val := NewValidator(
+			//	"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
+			//	sdk.NewCoins(val_coin),
+			//	sdk.NewCoin(bondDenom, stake_amount),
+			//	"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
+			//	"val1",
+			//)
+
+			//bal_amoint2, _ := sdk.NewIntFromString("10000000000000000000")
+			//stake_amount2, _ := sdk.NewIntFromString("10000000000000000000")
+			//val2_coin := sdk.NewCoin(bondDenom, bal_amoint2)
+			//val2 := NewValidator(
+			//	"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
+			//	sdk.NewCoins(val2_coin),
+			//	sdk.NewCoin(bondDenom, stake_amount2),
+			//	"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
+			//	"val2",
+			//)
 
 			staking.EndBlocker(ctx, app.StakingKeeper)
 			staking.BeginBlocker(ctx, app.StakingKeeper)
@@ -176,5 +185,16 @@ func NewReplayCmd() *cobra.Command {
 			return genutil.ExportGenesisFile(genDoc, "exported-genesis.json")
 		},
 	}
+	return cmd
+}
+
+func RootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "testnet builder",
+		Short: "testnet builder",
+	}
+
+	cmd.AddCommand(NewReplayCmd())
+	cmd.AddCommand(ChainInitCmd())
 	return cmd
 }

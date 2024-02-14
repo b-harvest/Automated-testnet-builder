@@ -1,0 +1,60 @@
+- Address: |
+    canto1ezma52mkzfyn7dl7wwpq4czjctrujhyu8a22zk
+  BalAmount: ""
+  Moniker: validator-0
+  PublicKeyPath: validator-0/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1tgd7gw07595jmhkgt6hy4r0ennvml5cntuf062
+  BalAmount: ""
+  Moniker: validator-1
+  PublicKeyPath: validator-1/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1w722359nje0gvanw25747phn5cvtzvhp74aeyx
+  BalAmount: ""
+  Moniker: validator-2
+  PublicKeyPath: validator-2/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1lxd2q9hkctf3jkrgxqtntxl0hrw2uav3pwmue7
+  BalAmount: ""
+  Moniker: validator-3
+  PublicKeyPath: validator-3/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1l38s96zxgxpe0xdgj39ywe24fez9xzev2gy7xu
+  BalAmount: ""
+  Moniker: validator-4
+  PublicKeyPath: validator-4/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1qykj02r5s8xy3hr8k7ayd9s5dxwq5w6xae5hah
+  BalAmount: ""
+  Moniker: validator-5
+  PublicKeyPath: validator-5/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto194vk8y43tspkm7pmcwuvahzyd8nkc04kjq2kkd
+  BalAmount: ""
+  Moniker: validator-6
+  PublicKeyPath: validator-6/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1g4cd82dp5jxf50ug6gtwyqsmj4a8yuy4llx2m6
+  BalAmount: ""
+  Moniker: validator-7
+  PublicKeyPath: validator-7/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1hp4aeuur7dl0ukppzylscdt6nua6lr9dhlzktn
+  BalAmount: ""
+  Moniker: validator-8
+  PublicKeyPath: validator-8/config/priv_validator_key.json
+  StakeAmount: ""
+- Address: |
+    canto1g8jfg4u5xrgfnxmkncggfcapl96q3nzjd9gksp
+  BalAmount: ""
+  Moniker: validator-9
+  PublicKeyPath: validator-9/config/priv_validator_key.json
+  StakeAmount: ""

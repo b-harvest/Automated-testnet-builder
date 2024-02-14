@@ -1,4 +1,4 @@
-module github.com/cosmosquad-labs/replay
+module github.com/b-harvest/replay
 
 go 1.18
 
@@ -6,6 +6,7 @@ require (
 	github.com/Canto-Network/Canto/v7 v7.0.1
 	github.com/cosmos/cosmos-sdk v0.45.9
 	github.com/evmos/ethermint v0.19.3
+	github.com/ghodss/yaml v1.0.0
 	github.com/spf13/cobra v1.6.0
 	github.com/tendermint/tendermint v0.34.25
 )
@@ -22,7 +23,7 @@ require (
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.2
 	github.com/tendermint/tm-db v0.6.7 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect

@@ -1,13 +1,12 @@
 package main
 
 import (
+	"github.com/b-harvest/replay/cmd"
 	"os"
-
-	"github.com/cosmosquad-labs/replay/cmd"
 )
 
 func main() {
-	if err := cmd.NewReplayCmd().Execute(); err != nil {
+	if err := cmd.RootCmd().Execute(); err != nil {
 		os.Exit(1)
 	}
 }
