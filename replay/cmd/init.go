@@ -13,17 +13,18 @@ import (
 func ChainInitCmd() *cobra.Command {
 	cmd := cobra.Command{
 		Use:  "init",
-		Args: cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			count, err := strconv.Atoi(args[0])
 			if err != nil {
 				panic(err)
 			}
 
+			balAmount := args[1]
+			stakeAmount := args[2]
+
 			var (
 				binary           = "cantod"
-				balAmount        = ""
-				stakeAmount      = ""
 				mnemonicList     []string
 				rawValidatorList RawValidatorList
 
