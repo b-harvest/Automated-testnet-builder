@@ -90,7 +90,7 @@ func ChainInitCmd() *cobra.Command {
 				address := jqAddressBuffer.String()
 
 				var validatorKeyBuffer bytes.Buffer
-				validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", mnemonic)
+				validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", moniker)
 				validatorKeyCmd.Stdout = &validatorKeyBuffer
 				validatorKeyCmd.Stderr = &validatorKeyBuffer
 
