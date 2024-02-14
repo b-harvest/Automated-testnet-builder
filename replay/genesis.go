@@ -79,7 +79,7 @@ func preReplayGenesis() {
 	}
 }
 
-func Genesis(dir, validatorFile string) error {
+func Genesis(dir, validatorFile, exportPath string) error {
 	preReplayGenesis()
 
 	db, err := sdk.NewLevelDB("application", dir)
@@ -189,5 +189,5 @@ func Genesis(dir, validatorFile string) error {
 
 	log.Println("Exporting genesis file...")
 
-	return genutil.ExportGenesisFile(genDoc, "exported-genesis.json")
+	return genutil.ExportGenesisFile(genDoc, exportPath)
 }
