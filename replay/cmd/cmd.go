@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
@@ -46,7 +45,7 @@ func NewReplayCmd() *cobra.Command {
 		initialHeight = int64(1)
 	)
 	cmd := &cobra.Command{
-		Use:  "replay [dir] [height]",
+		Use:  "replay [dir]",
 		Args: cobra.ExactArgs(2),
 		PreRun: func(_ *cobra.Command, args []string) {
 			sdkConfig := sdk.GetConfig()
@@ -67,10 +66,6 @@ func NewReplayCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := args[0]
-			height, err := strconv.ParseInt(args[1], 10, 64)
-			if err != nil {
-				return fmt.Errorf("parse height: %w", err)
-			}
 			cmd.SilenceUsage = true
 
 			db, err := sdk.NewLevelDB("application", dir)
@@ -81,6 +76,9 @@ func NewReplayCmd() *cobra.Command {
 
 			// Load previous height
 			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
+			height := app.LastBlockHeight()
+			fmt.Printf("LastBlockHeight: %d\n", height)
+
 			if err := app.LoadHeight(height - 1); err != nil {
 				panic(fmt.Errorf("failed to load height: %w", err))
 			}
