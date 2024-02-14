@@ -124,8 +124,8 @@ func NewReplayCmd() *cobra.Command {
 				}
 			}
 
-			//bal_amoint, _ := sdk.NewIntFromString("1000000000000000000000000000")
-			//stake_amount, _ := sdk.NewIntFromString("500000000000000000000000000")
+			//bal_amoint, _ := sdk.NewIntFromString("1000000000.000000000000000000")
+			//stake_amount, _ := sdk.NewIntFromString("500000000.000000000000000000")
 			//val_coin := sdk.NewCoin(bondDenom, bal_amoint)
 			//
 			//val := NewValidator(
@@ -136,8 +136,8 @@ func NewReplayCmd() *cobra.Command {
 			//	"val1",
 			//)
 
-			//bal_amoint2, _ := sdk.NewIntFromString("10000000000000000000")
-			//stake_amount2, _ := sdk.NewIntFromString("10000000000000000000")
+			//bal_amoint2, _ := sdk.NewIntFromString("10.000000000000000000")
+			//stake_amount2, _ := sdk.NewIntFromString("10.000000000000000000")
 			//val2_coin := sdk.NewCoin(bondDenom, bal_amoint2)
 			//val2 := NewValidator(
 			//	"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 func ChainInitCmd() *cobra.Command {
@@ -97,6 +98,10 @@ func ChainInitCmd() *cobra.Command {
 				//if err = json.Unmarshal(privValidatorKeyBytes, &privValidatorKey); err != nil {
 				//	return err
 				//}
+
+				// Cut prefix '\n'
+				address, _ = strings.CutPrefix(address, "\n")
+				mnemonic, _ = strings.CutPrefix(mnemonic, "\n")
 
 				fmt.Printf("Moniker: %s \nmnemonic: %s \naddress: %s\n", moniker, mnemonic, address)
 
