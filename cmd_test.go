@@ -1,14 +1,15 @@
 package cmd
 
 import (
+	"github.com/b-harvest/replay/replay"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestReadValidatorInfos(t *testing.T) {
 
-	expectedValidator := ValidatorList{
-		Validator{
+	expectedValidator := replay.ValidatorList{
+		replay.Validator{
 			Moniker: "val1",
 			Address: "canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
 			//VotingPower:    "1000000000000000000000000000",
@@ -19,7 +20,7 @@ func TestReadValidatorInfos(t *testing.T) {
 
 	bondDenom := "acanto"
 
-	validatorList, err := ReadValidatorInfosFile("../../example-vali-info.yaml", bondDenom)
+	validatorList, err := replay.ReadValidatorInfosFile("../../example-vali-info.yaml", bondDenom)
 	if err != nil {
 		return
 	}
