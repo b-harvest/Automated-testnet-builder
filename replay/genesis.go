@@ -55,7 +55,7 @@ func GenesisCmd() *cobra.Command {
 			dir := args[0]
 			validatorFile := args[1]
 			cmd.SilenceUsage = true
-			return Genesis(dir, validatorFile)
+			return Genesis(dir, validatorFile, "exported-genesis.json")
 		},
 	}
 	return cmd

@@ -24,7 +24,7 @@ func ChainInitCmd() *cobra.Command {
 			balAmount := args[1]
 			stakeAmount := args[2]
 
-			err = ChainInit(count, balAmount, stakeAmount)
+			err = ChainInit(count, balAmount, stakeAmount, "")
 			if err != nil {
 				return err
 			}
@@ -35,7 +35,7 @@ func ChainInitCmd() *cobra.Command {
 	return &cmd
 }
 
-func ChainInit(count int, balAmount, stakeAmount string) error {
+func ChainInit(count int, balAmount, stakeAmount, homePrefix string) error {
 	var (
 		err              error
 		binary           = "cantod"
@@ -47,9 +47,12 @@ func ChainInit(count int, balAmount, stakeAmount string) error {
 
 	for i := 0; i < count; i++ {
 		moniker := "validator-" + strconv.Itoa(i)
+		if homePrefix == "" {
+			homePrefix = moniker
+		}
 
 		var initBuffer bytes.Buffer
-		initCmd := exec.Command(binary, "--home", moniker, "init", "--chain-id", "canto_7700-1", moniker)
+		initCmd := exec.Command(binary, "--home", homePrefix, "init", "--chain-id", "canto_7700-1", moniker)
 		initCmd.Stdout = &initBuffer
 		initCmd.Stderr = &initBuffer
 		if err = initCmd.Run(); err != nil {
@@ -80,7 +83,7 @@ func ChainInit(count int, balAmount, stakeAmount string) error {
 		if err != nil {
 			panic(err)
 		}
-		keysAddCmd := exec.Command(binary, "--home", moniker,
+		keysAddCmd := exec.Command(binary, "--home", homePrefix,
 			"keys", "add", moniker, "--recover", "--keyring-backend", "test", "--output", "json")
 		keysAddCmd.Stdin = &mnemonicBuffer
 		keysAddCmd.Stdout = &keysAddBuffer
@@ -103,7 +106,7 @@ func ChainInit(count int, balAmount, stakeAmount string) error {
 		address := jqAddressBuffer.String()
 
 		var validatorKeyBuffer bytes.Buffer
-		validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", moniker)
+		validatorKeyCmd := exec.Command("cantod", "tendermint", "show-validator", "--home", homePrefix)
 		validatorKeyCmd.Stdout = &validatorKeyBuffer
 		validatorKeyCmd.Stderr = &validatorKeyBuffer
 
