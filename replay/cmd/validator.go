@@ -11,6 +11,7 @@ import (
 	"github.com/ghodss/yaml"
 	tmstrings "github.com/tendermint/tendermint/libs/strings"
 	"os"
+	"path/filepath"
 )
 
 type RawValidator struct {
@@ -46,7 +47,8 @@ type KeyStruct struct {
 type ValidatorList []Validator
 
 func ReadValidatorInfosFile(filename string, bondDenom string) (ValidatorList, error) {
-	fileContents, err := os.ReadFile(filename)
+	absFileName, err := filepath.Abs(filename)
+	fileContents, err := os.ReadFile(absFileName)
 	if err != nil {
 		return nil, err
 	}

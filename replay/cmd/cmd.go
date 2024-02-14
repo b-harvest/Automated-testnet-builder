@@ -47,7 +47,7 @@ func NewReplayCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "genesis",
 
-		Args: cobra.ExactArgs(3),
+		Args: cobra.ExactArgs(2),
 		PreRun: func(_ *cobra.Command, args []string) {
 			sdkConfig := sdk.GetConfig()
 			sdkConfig.SetPurpose(sdk.Purpose)
@@ -66,12 +66,12 @@ func NewReplayCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 3 {
+			if len(args) < 2 {
 				panic(fmt.Errorf("You have to use as \"replay genesis [dir] [validator-file]\". "))
 			}
 
-			dir := args[1]
-			validatorFile := args[2]
+			dir := args[0]
+			validatorFile := args[1]
 
 			cmd.SilenceUsage = true
 
