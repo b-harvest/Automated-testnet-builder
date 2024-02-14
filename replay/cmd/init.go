@@ -101,7 +101,9 @@ func ChainInitCmd() *cobra.Command {
 
 				// Cut prefix '\n'
 				address, _ = strings.CutPrefix(address, "\n")
+				address, _ = strings.CutSuffix(address, "\n")
 				mnemonic, _ = strings.CutPrefix(mnemonic, "\n")
+				mnemonic, _ = strings.CutSuffix(mnemonic, "\n")
 
 				fmt.Printf("Moniker: %s \nmnemonic: %s \naddress: %s\n", moniker, mnemonic, address)
 
