@@ -9,9 +9,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/spf13/cobra"
 
-	chain "github.com/Canto-Network/Canto/v2/app"
-	"github.com/Canto-Network/Canto/v2/cmd/config"
-	inflationtypes "github.com/Canto-Network/Canto/v2/x/inflation/types"
+	chain "github.com/Canto-Network/Canto/v7/app"
+	"github.com/Canto-Network/Canto/v7/cmd/config"
+	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -42,7 +42,7 @@ const (
 
 func NewReplayCmd() *cobra.Command {
 	var (
-		newChainId    = "canto_9911-1"
+		newChainId    = "canto_7700-1"
 		initialHeight = int64(1)
 	)
 	cmd := &cobra.Command{
@@ -80,7 +80,7 @@ func NewReplayCmd() *cobra.Command {
 			defer db.Close()
 
 			// Load previous height
-			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
+			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
 			if err := app.LoadHeight(height - 1); err != nil {
 				panic(fmt.Errorf("failed to load height: %w", err))
 			}
