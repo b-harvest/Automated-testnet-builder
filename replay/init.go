@@ -35,20 +35,21 @@ func ChainInitCmd() *cobra.Command {
 	return &cmd
 }
 
-func ChainInit(count int, balAmount, stakeAmount, homePrefix string) error {
+func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath string) error {
 	var (
 		err              error
 		binary           = "cantod"
 		mnemonicList     []string
 		rawValidatorList RawValidatorList
-
-		exportFilePath = "vali-info.yaml"
 	)
 
 	for i := 0; i < count; i++ {
 		moniker := "validator-" + strconv.Itoa(i)
 		if homePrefix == "" {
 			homePrefix = moniker
+		}
+		if exportFilePath == "" {
+			exportFilePath = "vali-info.yaml"
 		}
 
 		var initBuffer bytes.Buffer
