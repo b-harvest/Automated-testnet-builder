@@ -24,7 +24,7 @@ func ChainInitCmd() *cobra.Command {
 			balAmount := args[1]
 			stakeAmount := args[2]
 
-			err = ChainInit(count, balAmount, stakeAmount, "", "")
+			err = ChainInit(count, balAmount, stakeAmount, "", "", "")
 			if err != nil {
 				return err
 			}
