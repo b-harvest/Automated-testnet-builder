@@ -1,4 +1,4 @@
-package cmd
+package replay
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"

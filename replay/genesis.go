@@ -1,4 +1,4 @@
-package cmd
+package replay
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/evmos/ethermint/encoding"
 	ethermint "github.com/evmos/ethermint/types"
+	"github.com/spf13/cobra"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -21,7 +22,44 @@ import (
 var (
 	newChainId    = "canto_7700-1"
 	initialHeight = int64(1)
+	// AddressVerifier address verifier
+	AddressVerifier = func(bz []byte) error {
+		if n := len(bz); n != 20 && n != 32 {
+			return fmt.Errorf("incorrect address length %d", n)
+		}
+
+		return nil
+	}
 )
+
+const (
+	// DisplayDenom defines the denomination displayed to users in client applications.
+	DisplayDenom = "canto"
+	// BaseDenom defines to the default denomination used in canto (staking, EVM, governance, etc.)
+	BaseDenom = "acanto"
+)
+
+func GenesisCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "genesis",
+
+		Args: cobra.ExactArgs(2),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			preReplayGenesis()
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				panic(fmt.Errorf("You have to use as \"replay genesis [dir] [validator-file]\". "))
+			}
+
+			dir := args[0]
+			validatorFile := args[1]
+			cmd.SilenceUsage = true
+			return Genesis(dir, validatorFile)
+		},
+	}
+	return cmd
+}
 
 func preReplayGenesis() {
 	sdkConfig := sdk.GetConfig()
@@ -41,7 +79,7 @@ func preReplayGenesis() {
 	}
 }
 
-func ReplayGenesis(dir, validatorFile string) error {
+func Genesis(dir, validatorFile string) error {
 	preReplayGenesis()
 
 	db, err := sdk.NewLevelDB("application", dir)

@@ -1,7 +1,7 @@
-package cmd
+package main
 
 import (
-	"github.com/b-harvest/replay/replay"
+	"github.com/b-harvest/Automated-testnet-builder/replay"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
