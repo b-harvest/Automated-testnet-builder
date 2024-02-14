@@ -67,11 +67,11 @@ func NewReplayCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
-				panic(fmt.Errorf("You have to use as \"replay [dir] [validator-file]\". "))
+				panic(fmt.Errorf("You have to use as \"replay genesis [dir] [validator-file]\". "))
 			}
 
-			dir := args[0]
-			validatorFile := args[1]
+			dir := args[1]
+			validatorFile := args[2]
 
 			cmd.SilenceUsage = true
 
