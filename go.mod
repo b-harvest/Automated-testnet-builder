@@ -1,4 +1,4 @@
-module github.com/b-harvest/automated-testnet-builder
+module github.com/b-harvest/Automated-testnet-builder
 
 go 1.18
 
