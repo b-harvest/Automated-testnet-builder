@@ -55,7 +55,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 			exportFilePath = "vali-info.yaml"
 		}
 
-		homePath := homePrefix + "/" + moniker
+		homePath := homePrefix + strconv.Itoa(i)
 
 		var initBuffer bytes.Buffer
 		initCmd := exec.Command(binary, "--home", homePath, "init", "--chain-id", "canto_7700-1", moniker)
