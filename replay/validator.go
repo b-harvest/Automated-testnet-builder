@@ -14,12 +14,12 @@ import (
 )
 
 type RawValidator struct {
-	Moniker      string `yaml:"moniker"`
-	Address      string `yaml:"address"`
-	BalAmount    string `yaml:"balAmount"`
-	StakeAmount  string `yaml:"stakeAmount"`
-	ValidatorKey string `yaml:"validatorKey"`
-	Mnemonic     string `yaml:"mnemonic"`
+	Moniker      string `yaml:"Moniker"`
+	Address      string `yaml:"Address"`
+	BalAmount    string `yaml:"BalAmount"`
+	StakeAmount  string `yaml:"StakeAmount"`
+	ValidatorKey string `yaml:"ValidatorKey"`
+	Mnemonic     string `yaml:"Mnemonic"`
 }
 
 type RawValidatorList []RawValidator
