@@ -63,7 +63,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		initCmd.Stdout = &initBuffer
 		initCmd.Stderr = &initBuffer
 		if err = initCmd.Run(); err != nil {
-			panic(fmt.Errorf("%s\n", initBuffer.String()))
+			return fmt.Errorf("%s\n", initBuffer.String())
 		}
 
 		generateMnemonicBuffer := new(bytes.Buffer)
@@ -73,7 +73,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		generateMnemonicCmd.Stderr = generateMnemonicBuffer
 
 		if err = generateMnemonicCmd.Run(); err != nil {
-			panic(fmt.Errorf("%s\n", generateMnemonicBuffer.String()))
+			return fmt.Errorf("%s\n", generateMnemonicBuffer.String())
 		}
 
 		mnemonic := generateMnemonicBuffer.String()
@@ -82,14 +82,11 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		var mnemonicBuffer bytes.Buffer
 		_, err = mnemonicBuffer.Write([]byte(mnemonic))
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		//keysAddBuffer, keysAddCmdW, err := os.Pipe()
 		var keysAddBuffer bytes.Buffer
-		if err != nil {
-			panic(err)
-		}
 		keysAddCmd := exec.Command(binary, "--home", homePath,
 			"keys", "add", moniker, "--recover", "--keyring-backend", "test", "--output", "json")
 		keysAddCmd.Stdin = &mnemonicBuffer
@@ -97,7 +94,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		keysAddCmd.Stderr = &keysAddBuffer
 
 		if err = keysAddCmd.Run(); err != nil {
-			panic(fmt.Errorf("%s\n", keysAddBuffer.String()))
+			return fmt.Errorf("%s\n", keysAddBuffer.String())
 		}
 
 		var jqAddressBuffer bytes.Buffer
@@ -107,7 +104,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		jqAddress.Stderr = &jqAddressBuffer
 
 		if err = jqAddress.Run(); err != nil {
-			panic(fmt.Errorf("%s\n", jqAddressBuffer.String()))
+			return fmt.Errorf("%s\n", jqAddressBuffer.String())
 		}
 
 		address := jqAddressBuffer.String()
@@ -118,7 +115,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		validatorKeyCmd.Stderr = &validatorKeyBuffer
 
 		if err = validatorKeyCmd.Run(); err != nil {
-			panic(fmt.Errorf("%s\n", validatorKeyBuffer.String()))
+			return fmt.Errorf("%s\n", validatorKeyBuffer.String())
 		}
 
 		validatorKey := validatorKeyBuffer.String()
@@ -157,12 +154,12 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 
 	marshal, err := yaml.Marshal(rawValidatorList)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = os.WriteFile(exportFilePath, marshal, 0666)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
