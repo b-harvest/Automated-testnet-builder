@@ -45,7 +45,6 @@ func GenesisCmd() *cobra.Command {
 
 		Args: cobra.ExactArgs(2),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			preReplayGenesis()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
