@@ -159,7 +159,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		panic(err)
 	}
 
-	err = os.WriteFile(exportFilePath, marshal, 755)
+	err = os.WriteFile(exportFilePath, marshal, 0666)
 	if err != nil {
 		panic(err)
 	}
