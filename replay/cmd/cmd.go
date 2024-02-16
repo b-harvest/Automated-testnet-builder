@@ -9,9 +9,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/spf13/cobra"
 
-	chain "github.com/Canto-Network/Canto/v2/app"
-	"github.com/Canto-Network/Canto/v2/cmd/config"
-	inflationtypes "github.com/Canto-Network/Canto/v2/x/inflation/types"
+	chain "github.com/Canto-Network/Canto/v7/app"
+	"github.com/Canto-Network/Canto/v7/cmd/config"
+	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -80,7 +80,7 @@ func NewReplayCmd() *cobra.Command {
 			defer db.Close()
 
 			// Load previous height
-			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
+			app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
 			if err := app.LoadHeight(height - 1); err != nil {
 				panic(fmt.Errorf("failed to load height: %w", err))
 			}
@@ -103,41 +103,64 @@ func NewReplayCmd() *cobra.Command {
 			stake_amount1, _ := sdk.NewIntFromString("500000000000000000000000000")
 			val1_coin := sdk.NewCoin(bondDenom, bal_amoint1)
 			// Create validator1
-			val1 := NewValidator(
-				"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
+
+			var validatorList []Validator
+			validatorList = append(validatorList, NewValidator(
+				"canto1yw49hwhhds6583tykf9chh64s652udcxezrmdz",
 				sdk.NewCoins(val1_coin),
 				sdk.NewCoin(bondDenom, stake_amount1),
-				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
-				"val1",
-			)
+				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"/iKUVNLseOb8iUiaDVJNZ6GSCu+9DFO1U+Yy/jJjgBU=\"}",
+				"us-west-2-validator-0",
+			))
+			validatorList = append(validatorList, NewValidator(
+				"canto1w80matxepagkfnvdg9uh38j4rzeqn9y3p379km",
+				sdk.NewCoins(val1_coin),
+				sdk.NewCoin(bondDenom, stake_amount1),
+				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"sOwux+d5BfU1DN4J+lDbG3uuB+Lg0Ebruv8tREc/UHk=\"}",
+				"us-west-2-validator-1",
+			))
+			validatorList = append(validatorList, NewValidator(
+				"canto179079ruwl0emrr6tsm7f6vspsqjqmzu44gsxpn",
+				sdk.NewCoins(val1_coin),
+				sdk.NewCoin(bondDenom, stake_amount1),
+				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"O8cwRYoiupEi0Yk2Htn8eFK7pQxsBeEk5vBJeq9xO9g=\"}",
+				"us-west-2-validator-2",
+			))
 
-			if err := app.InflationKeeper.MintCoins(ctx, val1.VotingPower[0]); err != nil {
-				return err
-			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val1.GetAddress(), val1.VotingPower); err != nil {
-				return err
-			}
-			if err := val1.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
-				return err
-			}
-			bal_amoint2, _ := sdk.NewIntFromString("10000000000000000000")
-			stake_amount2, _ := sdk.NewIntFromString("10000000000000000000")
-			val2_coin := sdk.NewCoin(bondDenom, bal_amoint2)
-			val2 := NewValidator(
-				"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
-				sdk.NewCoins(val2_coin),
-				sdk.NewCoin(bondDenom, stake_amount2),
-				"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
-				"val2",
-			)
-			if err := app.InflationKeeper.MintCoins(ctx, val2.VotingPower[0]); err != nil {
-				return err
-			}
-			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, val2.GetAddress(), val2.VotingPower); err != nil {
-				return err
-			}
-			if err := val2.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
-				return err
+			//Address:
+			//BalAmount: "10000000000000000000000"
+			//Mnemonic: hero device liar stairs federal february symbol rib call situate issue
+			//	bless blossom program brass violin team spy horror abandon supreme match option
+			//	annual
+			//Moniker: us-west-2-validator-0
+			//StakeAmount: "7000000000000000000000"
+			//ValidatorKey: '{"@type":"/cosmos.crypto.ed25519.PubKey","key":"/iKUVNLseOb8iUiaDVJNZ6GSCu+9DFO1U+Yy/jJjgBU="}'
+			//	- Address: canto1w80matxepagkfnvdg9uh38j4rzeqn9y3p379km
+			//BalAmount: "10000000000000000000000"
+			//Mnemonic: punch enact ostrich simple motor bargain shield uphold utility domain
+			//	two clog pass large describe cross report taste average burst brass custom sense
+			//	guard
+			//Moniker: us-west-2-validator-1
+			//StakeAmount: "7000000000000000000000"
+			//ValidatorKey: '{"@type":"/cosmos.crypto.ed25519.PubKey","key":"sOwux+d5BfU1DN4J+lDbG3uuB+Lg0Ebruv8tREc/UHk="}'
+			//	- Address: canto179079ruwl0emrr6tsm7f6vspsqjqmzu44gsxpn
+			//BalAmount: "10000000000000000000000"
+			//Mnemonic: clown boat soap outer twenty remove online elephant bachelor aerobic disease
+			//	carpet drum ensure joy clock auto planet web layer album upgrade trap list
+			//Moniker: us-west-2-validator-2
+			//StakeAmount: "7000000000000000000000"
+			//ValidatorKey: '{"@type":"/cosmos.crypto.ed25519.PubKey","key":"O8cwRYoiupEi0Yk2Htn8eFK7pQxsBeEk5vBJeq9xO9g="}'
+
+			for _, v := range validatorList {
+				if err := app.InflationKeeper.MintCoins(ctx, v.VotingPower[0]); err != nil {
+					return err
+				}
+				if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, v.GetAddress(), v.VotingPower); err != nil {
+					return err
+				}
+				if err := v.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
+					return err
+				}
 			}
 
 			staking.EndBlocker(ctx, app.StakingKeeper)
