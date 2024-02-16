@@ -44,11 +44,11 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 	)
 
 	for i := 0; i < count; i++ {
-		monikerPrefix = "validator-"
-		moniker := monikerPrefix + strconv.Itoa(i)
-		if monikerPrefix != "" {
-			moniker = monikerPrefix + strconv.Itoa(i)
+		if monikerPrefix == "" {
+			monikerPrefix = "validator-"
 		}
+		moniker := monikerPrefix + strconv.Itoa(i)
+
 		if homePrefix == "" {
 			homePrefix = monikerPrefix
 		}
