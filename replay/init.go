@@ -143,10 +143,10 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 
 		// Generate RawValidator
 		rawValidatorList = append(rawValidatorList, RawValidator{
-			Moniker:      moniker,
-			Address:      address,
-			BalAmount:    balAmount,
-			StakeAmount:  stakeAmount,
+			Moniker: moniker,
+			Address: address,
+			//BalAmount:    balAmount,
+			//StakeAmount:  stakeAmount,
 			ValidatorKey: validatorKey,
 			Mnemonic:     mnemonic,
 		})

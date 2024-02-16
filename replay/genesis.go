@@ -7,6 +7,7 @@ import (
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/evmos/ethermint/encoding"
@@ -79,7 +80,7 @@ func preReplayGenesis() {
 }
 
 func Genesis(dir, validatorFile, exportPath string) error {
-	preReplayGenesis()
+	//preReplayGenesis()
 
 	db, err := sdk.NewLevelDB("application", dir)
 	if err != nil {
@@ -87,8 +88,10 @@ func Genesis(dir, validatorFile, exportPath string) error {
 	}
 	defer db.Close()
 
+	encodingConfig := encoding.MakeConfig(chain.ModuleBasics)
+
 	// Load previous height
-	app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encoding.MakeConfig(chain.ModuleBasics), simapp.EmptyAppOptions{})
+	app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encodingConfig, simapp.EmptyAppOptions{})
 	height := app.LastBlockHeight()
 	fmt.Printf("LastBlockHeight: %d\n", height)
 
@@ -117,8 +120,7 @@ func Genesis(dir, validatorFile, exportPath string) error {
 	}
 
 	for _, v := range validatorList {
-
-		if err := app.InflationKeeper.MintCoins(ctx, v.VotingPower[0]); err != nil {
+		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, v.VotingPower); err != nil {
 			return err
 		}
 		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, v.GetAddress(), v.VotingPower); err != nil {
@@ -128,30 +130,23 @@ func Genesis(dir, validatorFile, exportPath string) error {
 		if err := v.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
 			return err
 		}
+
 	}
 
-	//bal_amoint, _ := sdk.NewIntFromString("1000000000.000000000000000000")
-	//stake_amount, _ := sdk.NewIntFromString("500000000.000000000000000000")
-	//val_coin := sdk.NewCoin(bondDenom, bal_amoint)
-	//
-	//val := NewValidator(
-	//	"canto1cr6tg4cjvux00pj6zjqkh6d0jzg7mksapardz2",
-	//	sdk.NewCoins(val_coin),
-	//	sdk.NewCoin(bondDenom, stake_amount),
-	//	"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"CzUC2BDiSxOBJ4tKxd9flLfZy6nrSKJ8YE7mfiHnhv8=\"}",
-	//	"val1",
-	//)
+	// checking account types
+	accounts := app.AccountKeeper.GetAllAccounts(ctx)
 
-	//bal_amoint2, _ := sdk.NewIntFromString("10.000000000000000000")
-	//stake_amount2, _ := sdk.NewIntFromString("10.000000000000000000")
-	//val2_coin := sdk.NewCoin(bondDenom, bal_amoint2)
-	//val2 := NewValidator(
-	//	"canto1ywps7lrfjm8cww04pt9xad494u8qwhvdsjzzan",
-	//	sdk.NewCoins(val2_coin),
-	//	sdk.NewCoin(bondDenom, stake_amount2),
-	//	"{\"@type\": \"/cosmos.crypto.ed25519.PubKey\",\"key\":\"GmAFwR4Z6iFTv6yzMETDigK38Nh38TDimLGvCaKkzvo=\"}",
-	//	"val2",
-	//)
+	// Iterate over the accounts
+	for _, acc := range accounts {
+		// Check if the account is a Vesting Account
+		if vestingAcc, ok := acc.(exported.VestingAccount); ok {
+			address := vestingAcc.GetAddress()
+			fmt.Printf("Vesting Account Address: %s\n", address.String())
+
+		} else {
+			// Handle other account types
+		}
+	}
 
 	staking.EndBlocker(ctx, app.StakingKeeper)
 	staking.BeginBlocker(ctx, app.StakingKeeper)

@@ -14,10 +14,10 @@ import (
 )
 
 type RawValidator struct {
-	Moniker      string `yaml:"Moniker"`
-	Address      string `yaml:"Address"`
-	BalAmount    string `yaml:"BalAmount"`
-	StakeAmount  string `yaml:"StakeAmount"`
+	Moniker string `yaml:"Moniker"`
+	Address string `yaml:"Address"`
+	//BalAmount    string `yaml:"BalAmount"`
+	//StakeAmount  string `yaml:"StakeAmount"`
 	ValidatorKey string `yaml:"ValidatorKey"`
 	Mnemonic     string `yaml:"Mnemonic"`
 }
@@ -55,13 +55,16 @@ func ReadValidatorInfosFile(filename string, bondDenom string) (ValidatorList, e
 	var validatorList ValidatorList
 
 	for _, rv := range rawValidatorList {
-		balAmount, _ := sdk.NewIntFromString(rv.BalAmount)
-		stakeAmount, _ := sdk.NewIntFromString(rv.StakeAmount)
+		//balAmount, _ := sdk.NewIntFromString(rv.BalAmount)
+		//stakeAmount, _ := sdk.NewIntFromString(rv.StakeAmount)
 
 		configuredVal := NewValidator(
 			rv.Address,
-			sdk.NewCoins(sdk.NewCoin(bondDenom, balAmount)),
-			sdk.NewCoin(bondDenom, stakeAmount),
+			sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
+				sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
+				sdk.NewCoin("ibc/4F6A2DEFEA52CD8D90966ADCB2BD0593D3993AB0DF7F6AEB3EFD6167D79237B0", sdk.NewIntWithDecimal(1, 30)), //uUSDT
+			),
+			sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(1, 30)),
 			rv.ValidatorKey,
 			rv.Moniker,
 		)
