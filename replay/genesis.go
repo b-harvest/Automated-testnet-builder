@@ -5,7 +5,6 @@ import (
 	chain "github.com/Canto-Network/Canto/v7/app"
 	"github.com/Canto-Network/Canto/v7/cmd/config"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
@@ -91,7 +90,8 @@ func Genesis(dir, validatorFile, exportPath string) error {
 	encodingConfig := encoding.MakeConfig(chain.ModuleBasics)
 
 	// Load previous height
-	app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encodingConfig, simapp.EmptyAppOptions{})
+	app := chain.NewCanto(tmlog.NewNopLogger(), db, nil, false, map[int64]bool{}, "localnet", 0, false, encodingConfig, EmptyAppOptions{})
+
 	height := app.LastBlockHeight()
 	fmt.Printf("LastBlockHeight: %d\n", height)
 

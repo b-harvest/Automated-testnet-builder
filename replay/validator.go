@@ -13,6 +13,14 @@ import (
 	"path/filepath"
 )
 
+// EmptyAppOptions is a stub implementing AppOptions
+type EmptyAppOptions struct{}
+
+// Get implements AppOptions
+func (eao EmptyAppOptions) Get(o string) interface{} {
+	return nil
+}
+
 type RawValidator struct {
 	Moniker string `yaml:"Moniker"`
 	Address string `yaml:"Address"`
