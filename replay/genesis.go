@@ -20,8 +20,7 @@ import (
 )
 
 var (
-	newChainId    = "canto_7700-1"
-	initialHeight = int64(1)
+	newChainId = "canto_7700-1"
 	// AddressVerifier address verifier
 	AddressVerifier = func(bz []byte) error {
 		if n := len(bz); n != 20 && n != 32 {
@@ -163,7 +162,7 @@ func Genesis(dir, validatorFile, exportPath string) error {
 		ChainID:       newChainId,
 		AppState:      exported.AppState,
 		Validators:    exported.Validators,
-		InitialHeight: initialHeight,
+		InitialHeight: height,
 		ConsensusParams: &tmproto.ConsensusParams{
 			Block: tmproto.BlockParams{
 				MaxBytes:   exported.ConsensusParams.Block.MaxBytes,
