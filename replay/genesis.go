@@ -79,7 +79,7 @@ func preReplayGenesis() {
 }
 
 func Genesis(dir, validatorFile, exportPath string) error {
-	//preReplayGenesis()
+	preReplayGenesis()
 
 	db, err := sdk.NewLevelDB("application", dir)
 	if err != nil {
