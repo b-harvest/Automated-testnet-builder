@@ -3,14 +3,12 @@ package replay
 import (
 	"fmt"
 	chain "github.com/Canto-Network/Canto/v7/app"
-	"github.com/Canto-Network/Canto/v7/cmd/config"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/evmos/ethermint/encoding"
-	ethermint "github.com/evmos/ethermint/types"
 	"github.com/spf13/cobra"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -21,21 +19,6 @@ import (
 
 var (
 	newChainId = "canto_7700-1"
-	// AddressVerifier address verifier
-	AddressVerifier = func(bz []byte) error {
-		if n := len(bz); n != 20 && n != 32 {
-			return fmt.Errorf("incorrect address length %d", n)
-		}
-
-		return nil
-	}
-)
-
-const (
-	// DisplayDenom defines the denomination displayed to users in client applications.
-	DisplayDenom = "canto"
-	// BaseDenom defines to the default denomination used in canto (staking, EVM, governance, etc.)
-	BaseDenom = "acanto"
 )
 
 func GenesisCmd() *cobra.Command {
@@ -59,26 +42,7 @@ func GenesisCmd() *cobra.Command {
 	return cmd
 }
 
-func preReplayGenesis() {
-	sdkConfig := sdk.GetConfig()
-	sdkConfig.SetPurpose(sdk.Purpose)
-	sdkConfig.SetCoinType(ethermint.Bip44CoinType)
-	sdkConfig.SetBech32PrefixForAccount(config.Bech32PrefixAccAddr, config.Bech32PrefixAccPub)
-	sdkConfig.SetBech32PrefixForValidator(config.Bech32PrefixValAddr, config.Bech32PrefixValPub)
-	sdkConfig.SetBech32PrefixForConsensusNode(config.Bech32PrefixConsAddr, config.Bech32PrefixConsPub)
-	sdkConfig.SetAddressVerifier(AddressVerifier)
-	sdkConfig.SetFullFundraiserPath(ethermint.BIP44HDPath)
-	if err := sdk.RegisterDenom(DisplayDenom, sdk.OneDec()); err != nil {
-		panic(err)
-	}
-
-	if err := sdk.RegisterDenom(BaseDenom, sdk.NewDecWithPrec(1, ethermint.BaseDenomUnit)); err != nil {
-		panic(err)
-	}
-}
-
 func Genesis(dir, validatorFile, exportPath string) error {
-	preReplayGenesis()
 
 	db, err := sdk.NewLevelDB("application", dir)
 	if err != nil {
@@ -147,6 +111,8 @@ func Genesis(dir, validatorFile, exportPath string) error {
 		}
 	}
 
+	fmt.Printf("Length of accounts: %d\n", len(accounts))
+
 	staking.EndBlocker(ctx, app.StakingKeeper)
 	staking.BeginBlocker(ctx, app.StakingKeeper)
 
@@ -167,7 +133,7 @@ func Genesis(dir, validatorFile, exportPath string) error {
 			Block: tmproto.BlockParams{
 				MaxBytes:   exported.ConsensusParams.Block.MaxBytes,
 				MaxGas:     exported.ConsensusParams.Block.MaxGas,
-				TimeIotaMs: 1000,
+				TimeIotaMs: 1,
 			},
 			Evidence: tmproto.EvidenceParams{
 				MaxAgeNumBlocks: exported.ConsensusParams.Evidence.MaxAgeNumBlocks,
