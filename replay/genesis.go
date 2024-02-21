@@ -122,6 +122,9 @@ func Genesis(dir, validatorFile, exportPath string) error {
 
 	staking.EndBlocker(ctx, app.StakingKeeper)
 	staking.BeginBlocker(ctx, app.StakingKeeper)
+	//
+	//newSlashingParams := types.NewParams(10000000, types.DefaultMinSignedPerWindow, types.DefaultDowntimeJailDuration, types.DefaultSlashFractionDoubleSign, types.DefaultSlashFractionDowntime)
+	//app.SlashingKeeper.SetParams(ctx, newSlashingParams)
 
 	log.Println("Exporting app state and validators...")
 
@@ -139,7 +142,7 @@ func Genesis(dir, validatorFile, exportPath string) error {
 		ConsensusParams: &tmproto.ConsensusParams{
 			Block: tmproto.BlockParams{
 				MaxBytes:   exported.ConsensusParams.Block.MaxBytes,
-				MaxGas:     exported.ConsensusParams.Block.MaxGas,
+				MaxGas:     -1,
 				TimeIotaMs: 1,
 			},
 			Evidence: tmproto.EvidenceParams{
