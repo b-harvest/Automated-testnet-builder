@@ -73,12 +73,12 @@ func Genesis(dir, validatorFile, exportPath string) error {
 	app.GovKeeper.SetVotingParams(ctx, votingParams)
 	app.GovKeeper.SetTallyParams(ctx, tallyParams)
 
-	for _, v := range app.StakingKeeper.GetAllValidators(ctx) {
-		if !v.IsJailed() {
-			consAddr, _ := v.GetConsAddr()
-			app.StakingKeeper.Jail(ctx, consAddr)
-		}
-	}
+	//for _, v := range app.StakingKeeper.GetAllValidators(ctx) {
+	//	if !v.IsJailed() {
+	//		consAddr, _ := v.GetConsAddr()
+	//		app.StakingKeeper.Jail(ctx, consAddr)
+	//	}
+	//}
 
 	// Get staking bond denom
 	bondDenom := app.StakingKeeper.BondDenom(ctx)
