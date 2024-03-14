@@ -14,17 +14,16 @@ import (
 func ChainInitCmd() *cobra.Command {
 	cmd := cobra.Command{
 		Use:  "init",
-		Args: cobra.ExactArgs(3),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			count, err := strconv.Atoi(args[0])
 			if err != nil {
 				panic(err)
 			}
 
-			balAmount := args[1]
-			stakeAmount := args[2]
+			chainId := args[1]
 
-			err = ChainInit(count, balAmount, stakeAmount, "", "", "")
+			err = ChainInit(count, "", "", "", chainId)
 			if err != nil {
 				return err
 			}
@@ -35,7 +34,7 @@ func ChainInitCmd() *cobra.Command {
 	return &cmd
 }
 
-func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, monikerPrefix string) error {
+func ChainInit(count int, homePrefix, exportFilePath, monikerPrefix, chainId string) error {
 	var (
 		err              error
 		binary           = "cantod"
@@ -59,7 +58,7 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		homePath := homePrefix + strconv.Itoa(i)
 
 		var initBuffer bytes.Buffer
-		initCmd := exec.Command(binary, "--home", homePath, "init", "--chain-id", "canto_7700-1", moniker)
+		initCmd := exec.Command(binary, "--home", homePath, "init", "--chain-id", chainId, moniker)
 		initCmd.Stdout = &initBuffer
 		initCmd.Stderr = &initBuffer
 		if err = initCmd.Run(); err != nil {
@@ -139,7 +138,9 @@ func ChainInit(count int, balAmount, stakeAmount, homePrefix, exportFilePath, mo
 		validatorKey, _ = strings.CutPrefix(validatorKey, "\n")
 		validatorKey, _ = strings.CutSuffix(validatorKey, "\n")
 
-		fmt.Printf("Moniker: %s \nmnemonic: %s \naddress: %s\n", moniker, mnemonic, address)
+		fmt.Printf("============== %s ==============\n"+
+			"mnemonic: %s \naddress: %s\n"+
+			"==========================================", moniker, mnemonic, address)
 
 		// Generate RawValidator
 		rawValidatorList = append(rawValidatorList, RawValidator{
