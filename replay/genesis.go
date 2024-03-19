@@ -14,6 +14,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -42,7 +43,7 @@ func GenesisCmd() *cobra.Command {
 	return cmd
 }
 
-func Genesis(dir, validatorFile, exportPath string) error {
+func Genesis(dir, validatorFile, exportPath string) (string, error) {
 
 	db, err := sdk.NewLevelDB("application", dir)
 	if err != nil {
@@ -91,14 +92,14 @@ func Genesis(dir, validatorFile, exportPath string) error {
 
 	for _, v := range validatorList {
 		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, v.VotingPower); err != nil {
-			return err
+			return "", err
 		}
 		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, v.GetAddress(), v.VotingPower); err != nil {
-			return err
+			return "", err
 		}
 
 		if err := v.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
-			return err
+			return "", err
 		}
 
 	}
@@ -130,7 +131,7 @@ func Genesis(dir, validatorFile, exportPath string) error {
 
 	exported, err := app.ExportAppStateAndValidators(false, nil)
 	if err != nil {
-		return fmt.Errorf("failed to export app state and validators: %w", err)
+		return "", fmt.Errorf("failed to export app state and validators: %w", err)
 	}
 
 	genDoc := &tmtypes.GenesisDoc{
@@ -158,5 +159,5 @@ func Genesis(dir, validatorFile, exportPath string) error {
 
 	log.Println("Exporting genesis file...")
 
-	return genutil.ExportGenesisFile(genDoc, exportPath)
+	return strconv.FormatInt(exported.Height, 10), genutil.ExportGenesisFile(genDoc, exportPath)
 }
