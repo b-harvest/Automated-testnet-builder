@@ -69,7 +69,7 @@ func Genesis(dir, validatorFile, exportPath string) (string, error) {
 
 	// Set governance params
 	votingParams := app.GovKeeper.GetVotingParams(ctx)
-	votingParams.VotingPeriod = 30 * time.Second
+	votingParams.VotingPeriod = 300 * time.Second
 	tallyParams := app.GovKeeper.GetTallyParams(ctx)
 	tallyParams.Quorum = sdk.MustNewDecFromStr("0.000001")
 	app.GovKeeper.SetVotingParams(ctx, votingParams)
@@ -144,7 +144,7 @@ func Genesis(dir, validatorFile, exportPath string) (string, error) {
 		ConsensusParams: &tmproto.ConsensusParams{
 			Block: tmproto.BlockParams{
 				MaxBytes:   exported.ConsensusParams.Block.MaxBytes,
-				MaxGas:     -1,
+				MaxGas:     1000000000000000000,
 				TimeIotaMs: 1,
 			},
 			Evidence: tmproto.EvidenceParams{
