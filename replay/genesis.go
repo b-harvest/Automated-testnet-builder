@@ -20,14 +20,21 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
 
 var (
-	newChainId = "canto_7700-1"
+	newChainId     = "canto_7700-1"
+	keyringTestDir string
 )
+
+func init() {
+	userHome, _ := os.UserHomeDir()
+	keyringTestDir = filepath.Join(userHome, "keyring-test")
+}
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -129,6 +136,8 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		}
 	}
 
+	fmt.Printf("creating not validator accounts.... %d\n", accountCnt)
+
 	var (
 		f           *os.File
 		accountList RawValidatorList
@@ -165,6 +174,11 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 	}
 
 	_, err = f.Write(b)
+	if err != nil {
+		return "", err
+	}
+
+	err = os.RemoveAll(keyringTestDir)
 	if err != nil {
 		return "", err
 	}
@@ -232,7 +246,7 @@ var (
 )
 
 func NewAccount(name string) (*keyring.Info, string, error) {
-	kb, err := keyring.New(sdk.KeyringServiceName(), "test", "keyring-test", nil, []keyring.Option{}...)
+	kb, err := keyring.New(sdk.KeyringServiceName(), "test", keyringTestDir, nil, []keyring.Option{}...)
 	if err != nil {
 		return nil, "", err
 	}
