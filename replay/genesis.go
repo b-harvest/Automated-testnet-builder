@@ -4,17 +4,24 @@ import (
 	"fmt"
 	chain "github.com/Canto-Network/Canto/v7/app"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/go-bip39"
 	"github.com/evmos/ethermint/encoding"
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 	"log"
+	"math/rand"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,11 +29,22 @@ var (
 	newChainId = "canto_7700-1"
 )
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func randomString(n int) string {
+	sb := strings.Builder{}
+	sb.Grow(n)
+	for i := 0; i < n; i++ {
+		sb.WriteByte(charset[rand.Intn(len(charset))])
+	}
+	return sb.String()
+}
+
 func GenesisCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "genesis",
+		Use: "genesis [mainnet-dir] [validator-file-path] [export-genesis-path] [account-count]",
 
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		PreRun: func(cmd *cobra.Command, args []string) {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,14 +55,21 @@ func GenesisCmd() *cobra.Command {
 			dir := args[0]
 			validatorFile := args[1]
 			cmd.SilenceUsage = true
-			_, err := Genesis(dir, validatorFile, "exported-genesis.json")
+			accountCount, err := strconv.Atoi(args[2])
+			if err != nil {
+				return err
+			}
+
+			_, err = Genesis(dir, validatorFile, "exported-genesis.json", "account.yaml", accountCount)
 			return err
 		},
 	}
 	return cmd
 }
 
-func Genesis(dir, validatorFile, exportPath string) (string, error) {
+func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, accountCnt int) (string, error) {
+
+	rand.Seed(time.Now().UnixNano())
 
 	db, err := sdk.NewLevelDB("application", dir)
 	if err != nil {
@@ -102,7 +127,46 @@ func Genesis(dir, validatorFile, exportPath string) (string, error) {
 		if err := v.CreateValidator(ctx, &app.StakingKeeper, app.AppCodec()); err != nil {
 			return "", err
 		}
+	}
 
+	var (
+		f           *os.File
+		accountList RawValidatorList
+		b           []byte
+	)
+	f, err = os.Create(extraAccountExportPath)
+
+	for i := 0; i < accountCnt; i++ {
+
+		keyName := randomString(29)
+		account, mnemonic, err := NewAccount(keyName)
+		if err != nil {
+			return "", err
+		}
+
+		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)))); err != nil {
+			return "", err
+		}
+		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, (*account).GetAddress(), sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)))); err != nil {
+			return "", err
+		}
+
+		accountList = append(accountList, RawValidator{
+			Moniker:      keyName,
+			Address:      (*account).GetAddress().String(),
+			ValidatorKey: "",
+			Mnemonic:     mnemonic,
+		})
+	}
+
+	b, err = yaml.Marshal(accountList)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		return "", err
 	}
 
 	// checking account types
@@ -161,4 +225,48 @@ func Genesis(dir, validatorFile, exportPath string) (string, error) {
 	log.Println("Exporting genesis file...")
 
 	return strconv.FormatInt(exported.Height, 10), genutil.ExportGenesisFile(genDoc, exportPath)
+}
+
+var (
+	mnemonicEntropySize = 256
+)
+
+func NewAccount(name string) (*keyring.Info, string, error) {
+	kb, err := keyring.New(sdk.KeyringServiceName(), "test", "keyring-test", nil, []keyring.Option{}...)
+	if err != nil {
+		return nil, "", err
+	}
+
+	keyringAlgos, _ := kb.SupportedAlgorithms()
+	algo, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), keyringAlgos)
+	if err != nil {
+		return nil, "", err
+	}
+
+	coinType := sdk.GetConfig().GetCoinType()
+	account := uint32(0)
+	index := uint32(0)
+
+	hdPath := hd.CreateHDPath(coinType, account, index).String()
+
+	// Get bip39 mnemonic
+	var mnemonic, bip39Passphrase string
+
+	// read entropy seed straight from tmcrypto.Rand and convert to mnemonic
+	entropySeed, err := bip39.NewEntropy(mnemonicEntropySize)
+	if err != nil {
+		return nil, "", err
+	}
+
+	mnemonic, err = bip39.NewMnemonic(entropySeed)
+	if err != nil {
+		return nil, "", err
+	}
+
+	info, err := kb.NewAccount(name, mnemonic, bip39Passphrase, hdPath, algo)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &info, mnemonic, nil
 }
