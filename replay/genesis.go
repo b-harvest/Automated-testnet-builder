@@ -153,7 +153,10 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 			return "", err
 		}
 
-		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)))); err != nil {
+		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
+			sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
+			sdk.NewCoin("ibc/4F6A2DEFEA52CD8D90966ADCB2BD0593D3993AB0DF7F6AEB3EFD6167D79237B0", sdk.NewIntWithDecimal(1, 30)), //uUSDT
+		)); err != nil {
 			return "", err
 		}
 		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, (*account).GetAddress(), sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)))); err != nil {
