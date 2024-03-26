@@ -3,15 +3,17 @@ package replay
 import (
 	"fmt"
 	chain "github.com/Canto-Network/Canto/v7/app"
+	keyring2 "github.com/Canto-Network/Canto/v7/crypto/keyring"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/go-bip39"
+	"github.com/evmos/ethermint/crypto/hd"
 	"github.com/evmos/ethermint/encoding"
+	ethermint "github.com/evmos/ethermint/types"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	tmlog "github.com/tendermint/tendermint/libs/log"
@@ -34,6 +36,7 @@ var (
 func init() {
 	userHome, _ := os.UserHomeDir()
 	keyringTestDir = filepath.Join(userHome, "keyring-test")
+	fmt.Println(keyringTestDir)
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -49,7 +52,7 @@ func randomString(n int) string {
 
 func GenesisCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "genesis [mainnet-dir] [validator-file-path] [export-genesis-path] [account-count]",
+		Use: "genesis [mainnet-dir] [validator-file-path] [account-count]",
 
 		Args: cobra.ExactArgs(3),
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -159,13 +162,14 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		)); err != nil {
 			return "", err
 		}
-		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, (*account).GetAddress(), sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
-			sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
-			sdk.NewCoin("ibc/4F6A2DEFEA52CD8D90966ADCB2BD0593D3993AB0DF7F6AEB3EFD6167D79237B0", sdk.NewIntWithDecimal(1, 30)), //uUSDT
-		)); err != nil {
+		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, (*account).GetAddress(),
+			sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
+				sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
+				sdk.NewCoin("ibc/4F6A2DEFEA52CD8D90966ADCB2BD0593D3993AB0DF7F6AEB3EFD6167D79237B0", sdk.NewIntWithDecimal(1, 30)), //uUSDT
+			),
+		); err != nil {
 			return "", err
 		}
-
 		accountList = append(accountList, RawValidator{
 			Moniker:      keyName,
 			Address:      (*account).GetAddress().String(),
@@ -184,7 +188,11 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		return "", err
 	}
 
-	err = os.RemoveAll(keyringTestDir)
+	//err = os.RemoveAll(keyringTestDir)
+	//if err != nil {
+	//	return "", err
+	//}
+
 	if err != nil {
 		return "", err
 	}
@@ -252,41 +260,41 @@ var (
 )
 
 func NewAccount(name string) (*keyring.Info, string, error) {
-	kb, err := keyring.New(sdk.KeyringServiceName(), "test", keyringTestDir, nil, []keyring.Option{}...)
+	kb, err := keyring.New(sdk.KeyringServiceName(), "test", keyringTestDir, nil, []keyring.Option{keyring2.Option()}...)
 	if err != nil {
 		return nil, "", err
 	}
 
-	keyringAlgos, _ := kb.SupportedAlgorithms()
-	algo, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), keyringAlgos)
-	if err != nil {
-		return nil, "", err
-	}
+	cfg := sdk.GetConfig()
+	basePath := cfg.GetFullBIP44Path()
 
-	coinType := sdk.GetConfig().GetCoinType()
-	account := uint32(0)
-	index := uint32(0)
-
-	hdPath := hd.CreateHDPath(coinType, account, index).String()
+	iterator, err := ethermint.NewHDPathIterator(basePath, true)
+	hdPath := iterator()
 
 	// Get bip39 mnemonic
-	var mnemonic, bip39Passphrase string
+	////var mnemonic, bip39Passphrase string
+	//var bip39Passphrase string
+	//
+	//// read entropy seed straight from tmcrypto.Rand and convert to mnemonic
+	//entropySeed, err := bip39.NewEntropy(mnemonicEntropySize)
+	//if err != nil {
+	//	return nil, "", err
+	//}
+	//
+	//bip39Passphrase, err = bip39.NewMnemonic(entropySeed)
+	//if err != nil {
+	//	return nil, "", err
+	//}
 
-	// read entropy seed straight from tmcrypto.Rand and convert to mnemonic
-	entropySeed, err := bip39.NewEntropy(mnemonicEntropySize)
+	clientCtx := client.Context{
+		Keyring: kb,
+	}
+
+	info, mnemonic, err := clientCtx.Keyring.NewMnemonic(name, keyring.English, hdPath.String(), keyring.DefaultBIP39Passphrase, hd.EthSecp256k1)
 	if err != nil {
 		return nil, "", err
 	}
 
-	mnemonic, err = bip39.NewMnemonic(entropySeed)
-	if err != nil {
-		return nil, "", err
-	}
-
-	info, err := kb.NewAccount(name, mnemonic, bip39Passphrase, hdPath, algo)
-	if err != nil {
-		return nil, "", err
-	}
-
+	//return &info, mnemonic, nil
 	return &info, mnemonic, nil
 }
