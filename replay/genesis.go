@@ -36,7 +36,6 @@ var (
 func init() {
 	userHome, _ := os.UserHomeDir()
 	keyringTestDir = filepath.Join(userHome, "keyring-test")
-	fmt.Println(keyringTestDir)
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
