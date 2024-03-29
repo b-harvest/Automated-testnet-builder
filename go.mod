@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/Canto-Network/Canto/v7 v7.0.0
 	github.com/cosmos/cosmos-sdk v0.45.10
+	github.com/cosmos/go-bip39 v1.0.0
 	github.com/evmos/ethermint v0.19.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/spf13/cobra v1.6.0
@@ -24,11 +25,12 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
+	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/confio/ics23/go v0.7.0 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
-	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.3 // indirect
 	github.com/cosmos/ibc-go/v3 v3.4.0 // indirect
