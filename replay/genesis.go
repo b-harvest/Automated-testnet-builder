@@ -69,14 +69,14 @@ func GenesisCmd() *cobra.Command {
 				return err
 			}
 
-			_, err = Genesis(dir, validatorFile, "exported-genesis.json", "account.yaml", accountCount)
+			_, err = Genesis(dir, validatorFile, "exported-genesis.json", "account.yaml", accountCount, 300*time.Second)
 			return err
 		},
 	}
 	return cmd
 }
 
-func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, accountCnt int) (string, error) {
+func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, accountCnt int, votingPeriod time.Duration) (string, error) {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -103,7 +103,7 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 
 	// Set governance params
 	votingParams := app.GovKeeper.GetVotingParams(ctx)
-	votingParams.VotingPeriod = 300 * time.Second
+	votingParams.VotingPeriod = votingPeriod
 	tallyParams := app.GovKeeper.GetTallyParams(ctx)
 	tallyParams.Quorum = sdk.MustNewDecFromStr("0.000001")
 	app.GovKeeper.SetVotingParams(ctx, votingParams)
