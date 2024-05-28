@@ -1,7 +1,16 @@
 package replay
 
 import (
+	"crypto/ecdsa"
 	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	chain "github.com/Canto-Network/Canto/v7/app"
 	keyring2 "github.com/Canto-Network/Canto/v7/crypto/keyring"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
@@ -11,21 +20,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/evmos/ethermint/crypto/hd"
 	"github.com/evmos/ethermint/encoding"
 	ethermint "github.com/evmos/ethermint/types"
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"github.com/tendermint/tendermint/libs/json"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
-	"log"
-	"math/rand"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -77,7 +82,6 @@ func GenesisCmd() *cobra.Command {
 }
 
 func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, accountCnt int) (string, error) {
-
 	rand.Seed(time.Now().UnixNano())
 
 	db, err := sdk.NewLevelDB("application", dir)
@@ -125,6 +129,7 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		panic(fmt.Errorf("Failed to read validator file: %s\n%s", validatorFile, err.Error()))
 	}
 
+	fmt.Printf("creating validator accounts (num: %d)\n", len(validatorList))
 	for _, v := range validatorList {
 		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, v.VotingPower); err != nil {
 			return "", err
@@ -138,22 +143,13 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		}
 	}
 
-	fmt.Printf("creating not validator accounts.... %d\n", accountCnt)
+	fmt.Printf("done creating validator accounts (num: %d)\n", len(validatorList))
 
-	var (
-		f           *os.File
-		accountList RawValidatorList
-		b           []byte
-	)
-	f, err = os.Create(extraAccountExportPath)
-
+	fmt.Printf("creating tesing accounts (num: %d)\n", accountCnt)
+	var pks []string
 	for i := 0; i < accountCnt; i++ {
-
-		keyName := randomString(29)
-		account, mnemonic, err := NewAccount(keyName)
-		if err != nil {
-			return "", err
-		}
+		pk, addr := CreateRandomAcc()
+		pkStr := hexutil.Encode(crypto.FromECDSA(pk))
 
 		if err := app.BankKeeper.MintCoins(ctx, inflationtypes.ModuleName, sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
 			sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
@@ -161,7 +157,8 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		)); err != nil {
 			return "", err
 		}
-		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, (*account).GetAddress(),
+		sdkAddr := sdk.AccAddress(addr.Bytes())
+		if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, inflationtypes.ModuleName, sdkAddr,
 			sdk.NewCoins(sdk.NewCoin(bondDenom, sdk.NewIntWithDecimal(2, 30)),
 				sdk.NewCoin("ibc/17CD484EE7D9723B847D95015FA3EBD1572FD13BC84FB838F55B18A57450F25B", sdk.NewIntWithDecimal(1, 30)), //uUSDC
 				sdk.NewCoin("ibc/4F6A2DEFEA52CD8D90966ADCB2BD0593D3993AB0DF7F6AEB3EFD6167D79237B0", sdk.NewIntWithDecimal(1, 30)), //uUSDT
@@ -169,32 +166,26 @@ func Genesis(dir, validatorFile, exportPath, extraAccountExportPath string, acco
 		); err != nil {
 			return "", err
 		}
-		accountList = append(accountList, RawValidator{
-			Moniker:      keyName,
-			Address:      (*account).GetAddress().String(),
-			ValidatorKey: "",
-			Mnemonic:     mnemonic,
-		})
+		pks = append(pks, pkStr)
 	}
+	fmt.Printf("done creating tesing accounts (num: %d)\n", accountCnt)
 
-	b, err = yaml.Marshal(accountList)
+	fmt.Printf("writing private keys to ~/test_accounts/pks.json\n")
+	// write to pks to pks.json
+	usr, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-
-	_, err = f.Write(b)
+	filePath := filepath.Join(usr, "test_accounts", "pks.json")
+	bz, err := json.Marshal(pks)
 	if err != nil {
 		return "", err
 	}
-
-	//err = os.RemoveAll(keyringTestDir)
-	//if err != nil {
-	//	return "", err
-	//}
-
+	err = os.WriteFile(filePath, bz, 0644)
 	if err != nil {
 		return "", err
 	}
+	fmt.Printf("done writing private keys to ~/test_accounts/pks.json\n")
 
 	// checking account types
 	accounts := app.AccountKeeper.GetAllAccounts(ctx)
@@ -296,4 +287,9 @@ func NewAccount(name string) (*keyring.Info, string, error) {
 
 	//return &info, mnemonic, nil
 	return &info, mnemonic, nil
+}
+
+func CreateRandomAcc() (*ecdsa.PrivateKey, common.Address) {
+	key, _ := crypto.GenerateKey()
+	return key, crypto.PubkeyToAddress(key.PublicKey)
 }
