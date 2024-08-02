@@ -3,15 +3,17 @@ package replay
 import (
 	"bytes"
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/ghodss/yaml"
+	"github.com/spf13/cobra"
 )
 
 func ChainInitCmd() *cobra.Command {
+	var peerNode bool
 	cmd := cobra.Command{
 		Use:  "init",
 		Args: cobra.ExactArgs(2),
@@ -27,11 +29,38 @@ func ChainInitCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			if peerNode {
+				if err := PeerNodeInit(chainId); err != nil {
+					return fmt.Errorf("failed to initialize peer node: %v", err)
+				}
+			}
+
 			return nil
 		},
 	}
 
+	cmd.Flags().BoolVar(&peerNode, "peer-node", false, "Initialize peer node if set")
+
 	return &cmd
+}
+
+func PeerNodeInit(chainId string) error {
+	var (
+		binary   = "cantod"
+		homePath = "peer-node"
+		moniker  = "peer-node"
+	)
+	var initBuffer bytes.Buffer
+	initCmd := exec.Command(binary, "--home", homePath, "init", "--chain-id", chainId, moniker)
+	initCmd.Stdout = &initBuffer
+	initCmd.Stderr = &initBuffer
+	if err := initCmd.Run(); err != nil {
+		return fmt.Errorf("%s\n", initBuffer.String())
+	}
+
+	return nil
+
 }
 
 func ChainInit(count int, homePrefix, exportFilePath, monikerPrefix, chainId string) error {
