@@ -2,6 +2,14 @@ package replay
 
 import (
 	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	chain "github.com/Canto-Network/Canto/v7/app"
 	keyring2 "github.com/Canto-Network/Canto/v7/crypto/keyring"
 	inflationtypes "github.com/Canto-Network/Canto/v7/x/inflation/types"
@@ -19,13 +27,6 @@ import (
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
-	"log"
-	"math/rand"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -51,20 +52,21 @@ func randomString(n int) string {
 
 func GenesisCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "genesis [mainnet-dir] [validator-file-path] [account-count]",
+		Use: "genesis [mainnet-dir] [validator-file-path] [chain-id] [account-count] ",
 
-		Args: cobra.ExactArgs(3),
+		Args: cobra.ExactArgs(4),
 		PreRun: func(cmd *cobra.Command, args []string) {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 2 {
+			if len(args) < 3 {
 				panic(fmt.Errorf("You have to use as \"replay genesis [dir] [validator-file]\". "))
 			}
 
 			dir := args[0]
 			validatorFile := args[1]
 			cmd.SilenceUsage = true
-			accountCount, err := strconv.Atoi(args[2])
+			newChainId = args[2]
+			accountCount, err := strconv.Atoi(args[3])
 			if err != nil {
 				return err
 			}
